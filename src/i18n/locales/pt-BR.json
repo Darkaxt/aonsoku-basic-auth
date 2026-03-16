@@ -66,7 +66,6 @@
   },
   "playlist": {
     "headline": "Playlist",
-    "songCount_zero": "{{count}} músicas",
     "songCount_one": "{{count}} música",
     "songCount_many": "{{count}} músicas",
     "songCount_other": "{{count}} músicas",
@@ -203,7 +202,6 @@
       "options": "Mais opções para {{artist}}"
     },
     "info": {
-      "albumsCount_zero": "{{count}} álbuns",
       "albumsCount_one": "{{count}} álbum",
       "albumsCount_many": "{{count}} álbuns",
       "albumsCount_other": "{{count}} álbuns"
@@ -268,7 +266,6 @@
       }
     },
     "header": {
-      "episodeCount_zero": "{{count}} episódios",
       "episodeCount_one": "{{count}} episódio",
       "episodeCount_many": "{{count}} episódios",
       "episodeCount_other": "{{count}} episódios",
@@ -522,11 +519,9 @@
     "seconds": "{{seconds}}s"
   },
   "server": {
-    "songCount_zero": "{{count}} músicas",
     "songCount_one": "{{count}} música",
     "songCount_many": "{{count}} músicas",
     "songCount_other": "{{count}} músicas",
-    "folderCount_zero": "{{count}} diretórios",
     "folderCount_one": "{{count}} diretório",
     "folderCount_many": "{{count}} diretórios",
     "folderCount_other": "{{count}} diretórios",
@@ -688,6 +683,36 @@
             "toggle": "Use uma URL personalizada",
             "label": "URL",
             "example": "Exemplo: https://my-lrclib.com"
+          }
+        },
+        "animatedCover": {
+          "enabled": {
+            "label": "Habilitar Capas Animadas",
+            "info": "Quando habilitado, as capas animadas serão carregadas de um serviço externo quando disponível."
+          },
+          "customUrl": {
+            "toggle": "Use uma URL personalizada",
+            "info": "Use uma URL personalizada para a API de capas animadas no lugar da padrão.",
+            "label": "URL",
+            "example": "Padrão: https://artwork.m8tec.top"
+          },
+          "screens": {
+            "album": {
+              "label": "Página do Álbum",
+              "info": "Habilita as capas animadas no cabeçalho da página do álbum."
+            },
+            "fullscreen": {
+              "label": "Player Grande",
+              "info": "Habilita as capas animadas para a música atual no Player Grande."
+            },
+            "playerBar": {
+              "label": "Player Principal",
+              "info": "Habilita as capas animadas para a música atual no player principal."
+            },
+            "drawer": {
+              "label": "Fila de Reprodução e Letras",
+              "info": "Habilita as capas animadas para a música atual na gaveta da Fila de Reprodução e Letras."
+            }
           }
         }
       }

@@ -731,15 +731,15 @@
             },
             "fullscreen": {
               "label": "Duży odtwarzacz",
-              "info": "Włącz animowane okładki w odtwarzaczu pełnoekranowym."
+              "info": "Włącz animowane okładki w dużym odtwarzaczu."
             },
             "playerBar": {
               "label": "Dolny pasek odtwarzacza",
               "info": "Włącz animowane okładki dla aktualnej piosenki w dolnym pasku odtwarzacza."
             },
             "drawer": {
-              "label": "Szuflada Kolejki/Tekstu",
-              "info": "Włącz animowane okładki dla aktualnej piosenki w szufladzie kolejki/tekstu."
+              "label": "Kolejka I Tekst",
+              "info": "Włącz animowane okładki dla aktualnej piosenki w szufladzie kolejki i tekstu."
             }
           }
         }

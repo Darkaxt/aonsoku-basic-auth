@@ -303,6 +303,7 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
               set((state) => {
                 state.songlist.currentList = newCurrentList
                 state.songlist.originalList = newOriginalList
+                state.playerState.playbackContext.source = null
               })
 
               const { isPlaying } = get().playerState
@@ -325,6 +326,7 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
               set((state) => {
                 state.songlist.currentList = newCurrentList
                 state.songlist.originalList = newOriginalList
+                state.playerState.playbackContext.source = null
               })
 
               const { isPlaying } = get().playerState
@@ -943,6 +945,24 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
               set((state) => {
                 state.settings.colors.bigPlayer.blur.value = value
               })
+            },
+            isPlaylistActive: (playlistId: string) => {
+              const { source } = get().playerState.playbackContext
+
+              if (!source) return false
+
+              return source.type === 'playlist' && source.id === playlistId
+            },
+            isPlaylistPlaying: (playlistId: string) => {
+              const { source } = get().playerState.playbackContext
+              const { isPlaying } = get().playerState
+
+              if (!source) return false
+
+              const isActive =
+                source.type === 'playlist' && source.id === playlistId
+
+              return isActive && isPlaying
             },
           },
         })),

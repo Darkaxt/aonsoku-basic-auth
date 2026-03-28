@@ -216,6 +216,8 @@ export interface IPlayerActions {
   setUseSongColorOnQueue: (value: boolean) => void
   setUseSongColorOnBigPlayer: (value: boolean) => void
   setBigPlayerBlurValue: (value: number) => void
+  isPlaylistActive: (playlistId: string) => boolean
+  isPlaylistPlaying: (playlistId: string) => boolean
 }
 
 export interface IPlayerContext {

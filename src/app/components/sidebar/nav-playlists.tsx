@@ -10,14 +10,11 @@ import {
 } from '@/app/components/ui/main-sidebar'
 import { ScrollArea } from '@/app/components/ui/scroll-area'
 import { subsonic } from '@/service/subsonic'
-import { usePlayerContext, usePlayerStore } from '@/store/player.store'
 import { queryKeys } from '@/utils/queryKeys'
 import { SidebarPlaylistItem } from './playlist-item'
 
 export function NavPlaylists() {
   const { t } = useTranslation()
-  const { source } = usePlayerContext()
-  const isPlaying = usePlayerStore((state) => state.playerState.isPlaying)
 
   const { data: playlists } = useQuery({
     queryKey: [queryKeys.playlist.all],
@@ -25,7 +22,6 @@ export function NavPlaylists() {
   })
 
   const hasPlaylists = playlists !== undefined && playlists.length > 0
-  const isAnyPlaylistActive = source?.type === 'playlist'
 
   return (
     <>
@@ -50,17 +46,9 @@ export function NavPlaylists() {
         <ScrollArea className="pb-4">
           <MainSidebarMenu className="pr-4">
             {hasPlaylists &&
-              playlists.map((playlist) => {
-                const isPlaylistActive =
-                  isAnyPlaylistActive && source?.id === playlist.id
-                return (
-                  <SidebarPlaylistItem
-                    key={playlist.id}
-                    playlist={playlist}
-                    isPlaying={isPlaylistActive && isPlaying}
-                  />
-                )
-              })}
+              playlists.map((playlist) => (
+                <SidebarPlaylistItem key={playlist.id} playlist={playlist} />
+              ))}
 
             {!hasPlaylists && <EmptyPlaylistsMessage />}
           </MainSidebarMenu>

@@ -5,8 +5,8 @@ import { useSongList } from '@/app/hooks/use-song-list'
 import { subsonic } from '@/service/subsonic'
 import { useAppPages } from '@/store/app.store'
 import {
+  useIsArtistPlaying,
   usePlayerActions,
-  usePlayerContext,
   usePlayerStore,
 } from '@/store/player.store'
 import { IArtist } from '@/types/responses/artist'
@@ -25,11 +25,10 @@ export function ArtistButtons({
   isArtistEmpty,
 }: ArtistButtonsProps) {
   const { t } = useTranslation()
-  const { setSongList, togglePlayPause } = usePlayerActions()
+  const { setSongList, togglePlayPause, toggleShuffle } = usePlayerActions()
   const { showInfoPanel, toggleShowInfoPanel } = useAppPages()
   const { getArtistAllSongs } = useSongList()
-  const { source } = usePlayerContext()
-  const isPlaying = usePlayerStore((state) => state.playerState.isPlaying)
+  const { isArtistActive, isArtistPlaying } = useIsArtistPlaying(artist.id)
   const isShuffleActive = usePlayerStore(
     (state) => state.playerState.isShuffleActive,
   )
@@ -54,7 +53,7 @@ export function ArtistButtons({
     })
   }
 
-  async function handlePlayArtistRadio(shuffle = false) {
+  async function playArtistRadio(shuffle = false) {
     const songList = await getArtistAllSongs(artist?.name || '')
 
     if (songList) {
@@ -66,8 +65,28 @@ export function ArtistButtons({
     }
   }
 
+  function handlePlayButton() {
+    if (isArtistActive) {
+      togglePlayPause()
+    } else {
+      playArtistRadio()
+    }
+  }
+
+  function handleShuffleButton() {
+    if (isArtistActive) {
+      toggleShuffle()
+    } else {
+      playArtistRadio(true)
+    }
+  }
+
   const buttonsTooltips = {
-    play: t('playlist.buttons.play', { name: artist.name }),
+    play: () => {
+      return isArtistPlaying
+        ? t('playlist.buttons.pause', { name: artist.name })
+        : t('playlist.buttons.play', { name: artist.name })
+    },
     shuffle: t('playlist.buttons.shuffle', { name: artist.name }),
     options: t('playlist.buttons.options', { name: artist.name }),
     like: () => {
@@ -84,35 +103,20 @@ export function ArtistButtons({
     return <div className="h-8 w-full" />
   }
 
-  const isCurrentArtistActive =
-    source?.type === 'artist' && source.id === artist.id
-  const isArtistPlaying = isPlaying && isCurrentArtistActive
-
   return (
     <Actions.Container>
-      {!isArtistPlaying && (
-        <Actions.Button
-          tooltip={buttonsTooltips.play}
-          buttonStyle="primary"
-          onClick={() => handlePlayArtistRadio()}
-        >
-          <Actions.PlayIcon />
-        </Actions.Button>
-      )}
-      {isArtistPlaying && (
-        <Actions.Button
-          tooltip={buttonsTooltips.play}
-          buttonStyle="primary"
-          onClick={togglePlayPause}
-        >
-          <Actions.PauseIcon />
-        </Actions.Button>
-      )}
+      <Actions.Button
+        tooltip={buttonsTooltips.play()}
+        buttonStyle="primary"
+        onClick={handlePlayButton}
+      >
+        {isArtistPlaying ? <Actions.PauseIcon /> : <Actions.PlayIcon />}
+      </Actions.Button>
 
       <Actions.Button
         tooltip={buttonsTooltips.shuffle}
-        onClick={() => handlePlayArtistRadio(true)}
-        isActive={isArtistPlaying && isShuffleActive}
+        onClick={handleShuffleButton}
+        isActive={isArtistActive && isShuffleActive}
       >
         <Actions.ShuffleIcon />
       </Actions.Button>

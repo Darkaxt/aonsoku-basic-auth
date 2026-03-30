@@ -58,6 +58,7 @@ export default function ImageHeader({
     <ImageLoader id={coverArtId} type={coverArtType} size={coverArtSize}>
       {(src, isLoading) => (
         <div
+          id="image-header-container"
           className="flex relative w-full h-[calc(3rem+200px)] 2xl:h-[calc(3rem+250px)]"
           key={`header-${coverArtId}`}
         >

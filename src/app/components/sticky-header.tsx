@@ -3,7 +3,11 @@ import { ComponentPropsWithoutRef, useEffect, useState } from 'react'
 import { LazyLoadImage } from 'react-lazy-load-image-component'
 import { cn } from '@/lib/utils'
 import { CoverArt } from '@/types/coverArtType'
-import { getMainScrollElement } from '@/utils/scrollPageToTop'
+import {
+  getImageHeaderContainer,
+  getMainScrollContentElement,
+  getMainScrollElement,
+} from '@/utils/scrollPageToTop'
 import { Actions } from './actions'
 import { ImageLoader } from './image-loader'
 
@@ -25,9 +29,21 @@ export function StickyHeader({
 
   useEffect(() => {
     const scrollContainer = getMainScrollElement()
-    if (!scrollContainer) return
+    const contentContainer = getMainScrollContentElement()
+    const imageHeaderContainer = getImageHeaderContainer()
+
+    if (!scrollContainer || !contentContainer || !imageHeaderContainer) return
 
     const handleScroll = (e: Event) => {
+      const imageHeaderHeight = imageHeaderContainer.offsetHeight
+      const contentHeight = contentContainer.offsetHeight
+      const scrollContainerHeight = scrollContainer.offsetHeight
+      const pageScrollableSize = contentHeight - imageHeaderHeight
+
+      if (pageScrollableSize <= scrollContainerHeight) {
+        return
+      }
+
       const target = e.target as HTMLElement
       const scrollTop = target.scrollTop
 

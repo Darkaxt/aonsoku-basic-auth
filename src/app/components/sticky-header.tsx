@@ -34,18 +34,19 @@ export function StickyHeader({
 
     if (!scrollContainer || !contentContainer || !imageHeaderContainer) return
 
-    const handleScroll = (e: Event) => {
+    const handleScroll = () => {
       const imageHeaderHeight = imageHeaderContainer.offsetHeight
       const contentHeight = contentContainer.offsetHeight
       const scrollContainerHeight = scrollContainer.offsetHeight
       const pageScrollableSize = contentHeight - imageHeaderHeight
 
       if (pageScrollableSize <= scrollContainerHeight) {
+        setOpacity(0)
+        setContentOpacity(0)
         return
       }
 
-      const target = e.target as HTMLElement
-      const scrollTop = target.scrollTop
+      const scrollTop = scrollContainer.scrollTop
 
       const startFade = 30
       const endFade = 300
@@ -68,10 +69,14 @@ export function StickyHeader({
 
     scrollContainer.addEventListener('scroll', handleScroll, { passive: true })
 
-    handleScroll({ target: scrollContainer } as unknown as Event)
+    const resizeObserver = new ResizeObserver(handleScroll)
+    resizeObserver.observe(scrollContainer)
+
+    handleScroll()
 
     return () => {
       scrollContainer.removeEventListener('scroll', handleScroll)
+      resizeObserver.disconnect()
     }
   }, [])
 

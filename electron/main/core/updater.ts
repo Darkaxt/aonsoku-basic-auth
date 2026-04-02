@@ -12,7 +12,7 @@ export function setUpdaterWindow(window: BrowserWindow | null) {
 
 export function initAutoUpdater() {
   autoUpdater.autoDownload = false
-  autoUpdater.autoInstallOnAppQuit = true
+  autoUpdater.autoInstallOnAppQuit = false
   autoUpdater.forceDevUpdateConfig = false
 
   // IPC Handlers

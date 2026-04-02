@@ -81,10 +81,27 @@ export function setupEvents(window: BrowserWindow | null) {
   })
 }
 
+function resetIpcEvents() {
+  const eventsToReset = [
+    IpcChannels.ToggleFullscreen,
+    IpcChannels.ToggleMaximize,
+    IpcChannels.ToggleMinimize,
+    IpcChannels.CloseWindow,
+    IpcChannels.ThemeChanged,
+    IpcChannels.UpdateNativeTheme,
+    IpcChannels.UpdatePlayerState,
+    IpcChannels.SetDiscordRpcActivity,
+    IpcChannels.ClearDiscordRpcActivity,
+    IpcChannels.SaveAppSettings,
+  ]
+
+  eventsToReset.forEach((event) => ipcMain.removeAllListeners(event))
+}
+
 export function setupIpcEvents(window: BrowserWindow | null) {
   if (!window) return
 
-  ipcMain.removeAllListeners()
+  resetIpcEvents()
 
   ipcMain.on(IpcChannels.ToggleFullscreen, (_, isFullscreen: boolean) => {
     window.setFullScreen(isFullscreen)

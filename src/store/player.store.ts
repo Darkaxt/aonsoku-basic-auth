@@ -8,7 +8,12 @@ import { shallow } from 'zustand/shallow'
 import { createWithEqualityFn } from 'zustand/traditional'
 import { scrobble } from '@/service/scrobble'
 import { subsonic } from '@/service/subsonic'
-import { IPlayerContext, ISongList, LoopState } from '@/types/playerContext'
+import {
+  IPlayerContext,
+  ISongList,
+  LoopState,
+  PlaybackSourceType,
+} from '@/types/playerContext'
 import { ISong } from '@/types/responses/song'
 import { areSongListsEqual } from '@/utils/compareSongLists'
 import { isDesktop } from '@/utils/desktop'
@@ -59,6 +64,10 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
             currentPlaybackRate: 1,
             hasPrev: false,
             hasNext: false,
+            playbackContext: {
+              isSourceModified: false,
+              source: null,
+            },
           },
           fullscreen: {
             isFullscreen: false,
@@ -176,7 +185,12 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
             },
           },
           actions: {
-            setSongList: (songlist, index, shuffle = false) => {
+            setSongList: (
+              songlist,
+              index,
+              shuffle = false,
+              playbackSource = null,
+            ) => {
               const { currentList, currentSongIndex } = get().songlist
 
               const listsAreEqual = areSongListsEqual(currentList, songlist)
@@ -185,6 +199,10 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
               get().actions.resetAccumulatedTime()
               get().actions.setHasSyncedTheCurrentTrack(false)
               get().actions.setHasScrobbledTheCurrentTrack(false)
+
+              set((state) => {
+                state.playerState.playbackContext.source = playbackSource
+              })
 
               if (!listsAreEqual || (listsAreEqual && songHasChanged)) {
                 get().actions.resetProgress()
@@ -256,6 +274,7 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
                   state.playerState.isPlaying = true
                   state.songlist.radioList = []
                   state.songlist.podcastList = []
+                  state.playerState.playbackContext.source = null
                 })
               }
             },
@@ -290,6 +309,7 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
               set((state) => {
                 state.songlist.currentList = newCurrentList
                 state.songlist.originalList = newOriginalList
+                state.playerState.playbackContext.source = null
               })
 
               const { isPlaying } = get().playerState
@@ -312,6 +332,7 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
               set((state) => {
                 state.songlist.currentList = newCurrentList
                 state.songlist.originalList = newOriginalList
+                state.playerState.playbackContext.source = null
               })
 
               const { isPlaying } = get().playerState
@@ -566,6 +587,7 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
                 state.playerState.audioPlayerRef = null
                 state.settings.colors.currentSongColor = null
                 state.listenTime.accumulated = 0
+                state.playerState.playbackContext.source = null
               })
             },
             resetProgress: () => {
@@ -1290,3 +1312,65 @@ export const usePlayerCurrentList = () =>
 
 export const usePlayerFullscreen = () =>
   usePlayerStore((state) => state.fullscreen)
+
+export const usePlayerContext = () =>
+  usePlayerStore((state) => state.playerState.playbackContext)
+
+const useContextVerification = (id: string, type: PlaybackSourceType) => {
+  const { source } = usePlayerStore(
+    (state) => state.playerState.playbackContext,
+  )
+  const isPlayerPlaying = usePlayerStore((state) => state.playerState.isPlaying)
+
+  if (!source) return { isActive: false, isPlaying: false }
+
+  const isActive = source.type === type && source.id === id
+  const isPlaying = isActive && isPlayerPlaying
+
+  return { isActive, isPlaying }
+}
+
+export const useIsPlaylistPlaying = (playlistId: string) => {
+  const { isActive, isPlaying } = useContextVerification(playlistId, 'playlist')
+
+  return {
+    isPlaylistActive: isActive,
+    isPlaylistPlaying: isPlaying,
+  }
+}
+
+export const useIsAlbumPlaying = (albumId: string) => {
+  const { isActive, isPlaying } = useContextVerification(albumId, 'album')
+
+  return {
+    isAlbumActive: isActive,
+    isAlbumPlaying: isPlaying,
+  }
+}
+
+export const useIsArtistPlaying = (artistId: string) => {
+  const { isActive, isPlaying } = useContextVerification(artistId, 'artist')
+
+  return {
+    isArtistActive: isActive,
+    isArtistPlaying: isPlaying,
+  }
+}
+
+export const useIsSingleSongPlaying = (songId: string) => {
+  const playingSongId = usePlayerStore((state) => state.songlist.currentSong.id)
+  const { source } = usePlayerStore(
+    (store) => store.playerState.playbackContext,
+  )
+  const isPlayerPlaying = usePlayerStore((state) => state.playerState.isPlaying)
+
+  if (source) return { isSongPlaying: false }
+
+  const isSongActive = playingSongId === songId
+  const isSongPlaying = isSongActive && isPlayerPlaying
+
+  return {
+    isSongActive,
+    isSongPlaying,
+  }
+}

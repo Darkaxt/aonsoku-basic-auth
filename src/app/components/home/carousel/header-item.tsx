@@ -1,30 +1,48 @@
 import clsx from 'clsx'
-import { Play } from 'lucide-react'
+import { Pause, Play } from 'lucide-react'
 import { isFirefox } from 'react-device-detect'
 import { LazyLoadImage } from 'react-lazy-load-image-component'
 import { Link } from 'react-router-dom'
 import { BlurredCanvas } from '@/app/components/blurred-canvas'
+import { EqualizerBars } from '@/app/components/icons/equalizer-bars'
 import { ImageLoader } from '@/app/components/image-loader'
 import { Badge } from '@/app/components/ui/badge'
 import { Button } from '@/app/components/ui/button'
 import { ROUTES } from '@/routes/routesList'
 import { subsonic } from '@/service/subsonic'
-import { usePlayerActions } from '@/store/player.store'
+import { useIsAlbumPlaying, usePlayerActions } from '@/store/player.store'
 import { ISong } from '@/types/responses/song'
 import { convertSecondsToTime } from '@/utils/convertSecondsToTime'
 
 export function HeaderItem({ song }: { song: ISong }) {
-  const { setSongList } = usePlayerActions()
+  const { setSongList, togglePlayPause } = usePlayerActions()
+  const { isAlbumActive, isAlbumPlaying } = useIsAlbumPlaying(song.albumId)
 
-  async function handlePlaySongAlbum(song: ISong) {
+  async function handlePlaySongAlbum() {
     const album = await subsonic.albums.getOne(song.albumId)
 
-    if (album) {
-      const songIndex = album.song.findIndex((item) => item.id === song.id)
+    if (!album) return
 
-      setSongList(album.song, songIndex)
+    const songIndex = album.song.findIndex((item) => item.id === song.id)
+
+    setSongList(album.song, songIndex, false, {
+      id: album.id,
+      name: album.name,
+      type: 'album',
+    })
+  }
+
+  function handlePlayButton() {
+    if (isAlbumActive) {
+      togglePlayPause()
+    } else {
+      handlePlaySongAlbum()
     }
   }
+
+  const dataTestId = isAlbumPlaying
+    ? 'header-pause-button'
+    : 'header-play-button'
 
   return (
     <div
@@ -58,22 +76,37 @@ export function HeaderItem({ song }: { song: ISong }) {
                     <Button
                       className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full w-14 h-14"
                       variant="outline"
-                      onClick={() => handlePlaySongAlbum(song)}
-                      data-testid="header-play-button"
+                      onClick={handlePlayButton}
+                      data-testid={dataTestId}
                     >
-                      <Play className="fill-foreground" />
+                      {isAlbumPlaying ? (
+                        <Pause className="fill-foreground" />
+                      ) : (
+                        <Play className="fill-foreground" />
+                      )}
                     </Button>
                   </div>
                 </div>
                 <div className="flex flex-1 h-full flex-col justify-end">
-                  <Link to={ROUTES.ALBUM.PAGE(song.albumId)} className="w-fit">
-                    <h1
-                      data-testid="header-title"
-                      className="w-full scroll-m-20 text-3xl 2xl:text-4xl font-bold tracking-tight mb-0 2xl:mb-1 hover:underline"
+                  <div className="flex items-center gap-2">
+                    {isAlbumPlaying && (
+                      <EqualizerBars
+                        size={24}
+                        className="text-foreground mb-1"
+                      />
+                    )}
+                    <Link
+                      to={ROUTES.ALBUM.PAGE(song.albumId)}
+                      className="w-fit"
                     >
-                      {song.title}
-                    </h1>
-                  </Link>
+                      <h1
+                        data-testid="header-title"
+                        className="w-full scroll-m-20 text-3xl 2xl:text-4xl font-bold tracking-tight mb-0 2xl:mb-1 hover:underline"
+                      >
+                        {song.title}
+                      </h1>
+                    </Link>
+                  </div>
                   {!song.artistId ? (
                     <h4
                       data-testid="header-artist"

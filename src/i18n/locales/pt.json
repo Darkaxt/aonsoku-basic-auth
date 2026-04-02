@@ -339,10 +339,7 @@
     "content": {
       "sidebar": {
         "group": "Menu lateral",
-        "description": "Gira a visibilidade e a organização das secções exibidas no menu lateral.",
-        "radios": {
-          "section": "Esconder secção de rádios"
-        }
+        "description": "Mostrar ou ocultar secções na barra lateral."
       },
       "podcast": {
         "group": "Podcasts",
@@ -397,6 +394,7 @@
     "refresh": "Atualizar playlists",
     "buttons": {
       "play": "Tocar {{name}}",
+      "pause": "Pausar {{name}}",
       "shuffle": "Tocar {{name}} no modo aleatório",
       "options": "Mais opções para {{name}}"
     },
@@ -467,7 +465,10 @@
     "headline": "Álbum",
     "buttons": {
       "like": "Curtir {{name}}",
-      "dislike": "Remover curtida de {{name}}"
+      "dislike": "Remover curtida de {{name}}",
+      "play": "Reproduzir {{name}}",
+      "pause": "Pausar {{name}}",
+      "shuffle": "Reproduzir {{name}} em modo aleatório"
     },
     "info": {
       "about": "Sobre {{name}}",
@@ -533,7 +534,8 @@
     "playlists": "Playlists",
     "radios": "Rádios",
     "podcasts": "Podcasts",
-    "emptyPlaylist": "Nenhuma playlist criada ainda"
+    "emptyPlaylist": "Nenhuma playlist criada ainda",
+    "genres": "Géneros"
   },
   "menu": {
     "language": "Linguagem",
@@ -750,6 +752,17 @@
       "MM": "%d meses",
       "y": "1 ano",
       "yy": "%d anos"
+    }
+  },
+  "genre": {
+    "headline": "Género"
+  },
+  "genres": {
+    "albumCount_one": "{{count}} álbum",
+    "albumCount_other": "{{count}} álbuns",
+    "buttons": {
+      "shuffleTracks": "Faixas aleatórias",
+      "shuffleAlbums": "Álbuns aleatórios"
     }
   }
 }

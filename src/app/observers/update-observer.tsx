@@ -66,6 +66,12 @@ export function UpdateObserver() {
         isLoading: false,
       })
     })
+
+    window.api.onDownloadProgress((progress) => {
+      toast.update('update', {
+        progress: progress.percent / 100,
+      })
+    })
   }, [t, setRemindOnNextBoot])
 
   if (!updateCheckResult || !updateCheckResult.isUpdateAvailable) return null
@@ -78,6 +84,7 @@ export function UpdateObserver() {
       type: 'default',
       isLoading: true,
       toastId: 'update',
+      progress: 0,
     })
 
     setUpdateHasStarted(true)

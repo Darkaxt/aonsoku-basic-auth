@@ -728,6 +728,10 @@
         "group": "Sidebar",
         "description": "Show or hide sections in the sidebar."
       },
+      "features": {
+        "group": "Features",
+        "description": "Enable or disable client features"
+      },
       "podcast": {
         "group": "Podcasts",
         "description": "Enable integration with the Aonsoku Podcasts service.",

@@ -11,6 +11,7 @@ import { DataTableColumnHeader } from '@/app/components/ui/data-table-column-hea
 import { SimpleTooltip } from '@/app/components/ui/simple-tooltip'
 import i18n from '@/i18n'
 import { ROUTES } from '@/routes/routesList'
+import { useAppStore } from '@/store/app.store'
 import { ColumnDefType } from '@/types/react-table/columnDef'
 import { ISong } from '@/types/responses/song'
 import { formatBitrate } from '@/utils/audioInfo'
@@ -262,11 +263,15 @@ export function songsColumns(): ColumnDefType<ISong>[] {
         maxWidth: 120,
         justifyContent: 'end',
       },
-      header: () => (
-        <MemoSimpleTooltip text={i18n.t('table.columns.favorite')}>
-          <HeartIcon className="w-4 h-4 mr-2" />
-        </MemoSimpleTooltip>
-      ),
+      header: () => {
+        const hideFavoritesSection = useAppStore().pages.hideFavoritesSection
+        if (hideFavoritesSection) return null
+        return (
+          <MemoSimpleTooltip text={i18n.t('table.columns.favorite')}>
+            <HeartIcon className="w-4 h-4 mr-2" />
+          </MemoSimpleTooltip>
+        )
+      },
       cell: ({ row }) => <MemoSongTableActions row={row} />,
     },
   ]

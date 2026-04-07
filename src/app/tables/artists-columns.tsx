@@ -4,6 +4,7 @@ import { TableLikeButton } from '@/app/components/table/like-button'
 import PlaySongButton from '@/app/components/table/play-button'
 import { DataTableColumnHeader } from '@/app/components/ui/data-table-column-header'
 import i18n from '@/i18n'
+import { useAppStore } from '@/store/app.store'
 import { ColumnDefType } from '@/types/react-table/columnDef'
 import { ISimilarArtist } from '@/types/responses/artist'
 
@@ -15,6 +16,7 @@ const MemoDataTableColumnHeader = memo(
 const MemoTableLikeButton = memo(TableLikeButton)
 
 export function artistsColumns(): ColumnDefType<ISimilarArtist>[] {
+  const hideFavoritesSection = useAppStore().pages.hideFavoritesSection
   return [
     {
       id: 'index',
@@ -70,25 +72,25 @@ export function artistsColumns(): ColumnDefType<ISimilarArtist>[] {
         </MemoDataTableColumnHeader>
       ),
     },
-    {
-      id: 'starred',
-      accessorKey: 'starred',
-      header: '',
-      style: {
-        width: 48,
-        maxWidth: 48,
-      },
-      cell: ({ row }) => {
-        const { starred, id } = row.original
-
-        return (
-          <MemoTableLikeButton
-            type="artist"
-            entityId={id}
-            starred={typeof starred === 'string'}
-          />
-        )
-      },
-    },
+    ...(hideFavoritesSection
+      ? []
+      : [
+          {
+            id: 'starred',
+            accessorKey: 'starred',
+            header: '',
+            style: { width: 48, maxWidth: 48 },
+            cell: ({ row }) => {
+              const { starred, id } = row.original
+              return (
+                <MemoTableLikeButton
+                  type="artist"
+                  entityId={id}
+                  starred={typeof starred === 'string'}
+                />
+              )
+            },
+          },
+        ]),
   ]
 }

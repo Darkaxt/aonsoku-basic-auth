@@ -5,6 +5,7 @@ import { MiniPlayerButton } from '@/app/components/mini-player/button'
 import { RadioInfo } from '@/app/components/player/radio-info'
 import { TrackInfo } from '@/app/components/player/track-info'
 import { podcasts } from '@/service/podcasts'
+import { useAppStore } from '@/store/app.store'
 import {
   getVolume,
   usePlayerActions,
@@ -47,6 +48,7 @@ const MemoLyricsButton = memo(PlayerLyricsButton)
 const MemoMiniPlayerButton = memo(MiniPlayerButton)
 
 export function Player() {
+  const hideFavoritesSection = useAppStore().pages.hideFavoritesSection
   const audioRef = useRef<HTMLAudioElement>(null)
   const radioRef = useRef<HTMLAudioElement>(null)
   const podcastRef = useRef<HTMLAudioElement>(null)
@@ -212,9 +214,13 @@ export function Player() {
         {/* Remain Controls and Volume */}
         <div className="flex items-center w-full justify-end">
           <div className="flex items-center gap-1">
-            {isSong && (
+            {isSong && !hideFavoritesSection && (
               <>
                 <MemoPlayerLikeButton disabled={!song} />
+              </>
+            )}
+            {isSong && (
+              <>
                 <MemoLyricsButton disabled={!song} />
                 <MemoPlayerQueueButton disabled={!song} />
               </>

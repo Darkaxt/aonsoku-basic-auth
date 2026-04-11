@@ -18,6 +18,7 @@ import {
   useReplayGainState,
 } from '@/store/player.store'
 import { LoopState } from '@/types/playerContext'
+import { ensureSupportForAlac } from '@/utils/alac'
 import { hasPiPSupport } from '@/utils/browser'
 import { logger } from '@/utils/logger'
 import { ReplayGainParams } from '@/utils/replayGain'
@@ -106,6 +107,8 @@ export function Player() {
 
     if (!infinityDuration) {
       setCurrentDuration(audioDuration)
+    } else if (isSong && song?.duration) {
+      setCurrentDuration(song.duration)
     }
 
     if (isPodcast && infinityDuration && podcast) {
@@ -128,6 +131,8 @@ export function Player() {
   }, [
     getAudioRef,
     isPodcast,
+    isSong,
+    song,
     podcast,
     setCurrentDuration,
     getCurrentPodcastProgress,
@@ -244,7 +249,11 @@ export function Player() {
       {isSong && song && (
         <AudioPlayer
           replayGain={trackReplayGain}
-          src={getSongStreamUrl(song.id)}
+          src={getSongStreamUrl(
+            song.id,
+            undefined,
+            ensureSupportForAlac(song.suffix),
+          )}
           autoPlay={isPlaying}
           audioRef={audioRef}
           loop={loopState === LoopState.One}

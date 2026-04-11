@@ -17,6 +17,7 @@ const MemoTableLikeButton = memo(TableLikeButton)
 
 export function artistsColumns(): ColumnDefType<ISimilarArtist>[] {
   const hideFavoritesSection = useAppStore().pages.hideFavoritesSection
+
   return [
     {
       id: 'index',
@@ -72,25 +73,24 @@ export function artistsColumns(): ColumnDefType<ISimilarArtist>[] {
         </MemoDataTableColumnHeader>
       ),
     },
-    ...(hideFavoritesSection
-      ? []
-      : [
-          {
-            id: 'starred',
-            accessorKey: 'starred',
-            header: '',
-            style: { width: 48, maxWidth: 48 },
-            cell: ({ row }) => {
-              const { starred, id } = row.original
-              return (
-                <MemoTableLikeButton
-                  type="artist"
-                  entityId={id}
-                  starred={typeof starred === 'string'}
-                />
-              )
-            },
-          },
-        ]),
+    {
+      id: 'starred',
+      accessorKey: 'starred',
+      header: '',
+      style: { width: 48, maxWidth: 48 },
+      cell: ({ row }) => {
+        const { starred, id } = row.original
+
+        if (hideFavoritesSection) return null
+
+        return (
+          <MemoTableLikeButton
+            type="artist"
+            entityId={id}
+            starred={typeof starred === 'string'}
+          />
+        )
+      },
+    },
   ]
 }

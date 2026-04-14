@@ -640,7 +640,8 @@
       "appearance": "Apariencia",
       "language": "Lenguaje & Región",
       "privacy": "Privacidad & Seguridad",
-      "accounts": "Cuentas"
+      "accounts": "Cuentas",
+      "desktop": "Aplicación de Escritorio"
     },
     "appearance": {
       "general": {
@@ -775,7 +776,7 @@
         "group": "Discord Rich Presence",
         "description": "Comparte la canción que reproduciéndose con amigos en Discord.",
         "enabled": {
-          "label": "Habilitar Integración"
+          "label": "Habilitar integración"
         }
       }
     },

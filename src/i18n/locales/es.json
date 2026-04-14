@@ -368,7 +368,7 @@
     "download": "Descargar",
     "playlist": {
       "add": "Añadir a lista de reproducción",
-      "edit": "Editar Lista de Reproducción",
+      "edit": "Editar lista de reproducción",
       "delete": "Eliminar lista de reproducción",
       "search": "Encontrar una lista de reproducción",
       "create": "Nueva lista de reproducción",
@@ -572,7 +572,7 @@
       },
       "addButton": "Añadir Podcast",
       "latestEpisodes": "Últimos Episodios",
-      "all": "Explorar"
+      "all": "Examinar"
     },
     "emptyPage": {
       "message": "No se agregaron podcasts",
@@ -783,9 +783,9 @@
     "desktop": {
       "general": {
         "group": "General",
-        "description": "Personaliza las preferencias de la aplicación de escritorio.",
+        "description": "Personaliza preferencias para la aplicación de escritorio.",
         "tray": {
-          "label": "Minimizar a Bandeja",
+          "label": "Minimizar a bandeja",
           "info": "Cuando está habilitada, la aplicación se minimizará a la bandeja del sistema en lugar de cerrarse al pulsar en el botón de cerrar."
         }
       }
@@ -796,7 +796,7 @@
   },
   "genres": {
     "albumCount_one": "{{count}} álbum",
-    "albumCount_many": "",
+    "albumCount_many": "{{count}} álbumes",
     "albumCount_other": "{{count}} álbumes",
     "buttons": {
       "shuffleTracks": "Canciones aleatorias",

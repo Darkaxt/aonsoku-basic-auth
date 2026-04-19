@@ -100,3 +100,7 @@ if (process.contextIsolated) {
   // @ts-expect-error (define in dts)
   window.api = api
 }
+
+contextBridge.exposeInMainWorld('envVars', {
+  XDG_CURRENT_DESKTOP: process.env.XDG_CURRENT_DESKTOP
+})

@@ -11,6 +11,7 @@ import {
 import { subsonic } from '@/service/subsonic'
 import { usePlayerRef, usePlayerSonglist } from '@/store/player.store'
 import { ILyric } from '@/types/responses/song'
+import { queryKeys } from '@/utils/queryKeys'
 
 interface LyricProps {
   lyrics: ILyric
@@ -23,7 +24,7 @@ export function LyricsTab() {
   const { id, artist, title, duration } = currentSong
 
   const { data: lyrics, isLoading } = useQuery({
-    queryKey: ['get-lyrics', artist, title, duration],
+    queryKey: [queryKeys.song.lyrics, artist, title, duration],
     queryFn: () =>
       subsonic.lyrics.getLyrics({
         id,

@@ -436,12 +436,10 @@
         "group": "Barre latérale",
         "description": "Afficher ou masquer des sections dans la barre latérale."
       },
-      "images": {
-        "group": "Images",
-        "description": "Personnaliser les paramètres des images.",
-        "cacheLayer": {
-          "info": "Lorsque cette option est activée, les images seront mises en cache localement afin d'améliorer les performances.",
-          "label": "Activer le cache d'images"
+      "caches": {
+        "images": {
+          "label": "Activer le cache d'images",
+          "info": "Lorsque cette option est activée, les images seront mises en cache localement afin d'améliorer les performances."
         }
       }
     },

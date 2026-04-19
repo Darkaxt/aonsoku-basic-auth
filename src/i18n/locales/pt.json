@@ -357,12 +357,10 @@
           "url": "URL do Servidor"
         }
       },
-      "images": {
-        "group": "Imagens",
-        "description": "Personalize as configurações de imagens.",
-        "cacheLayer": {
-          "info": "Quando ativado, as imagens serão armazenadas localmente para melhorar o desempenho.",
-          "label": "Ativar cache de imagens"
+      "caches": {
+        "images": {
+          "label": "Ativar cache de imagens",
+          "info": "Quando ativado, as imagens serão armazenadas localmente para melhorar o desempenho."
         }
       }
     },

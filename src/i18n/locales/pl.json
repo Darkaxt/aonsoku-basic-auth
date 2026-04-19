@@ -670,12 +670,10 @@
           "label": "Włącz Integrację"
         }
       },
-      "images": {
-        "group": "Obrazy",
-        "description": "Zmień ustawienia obrazów.",
-        "cacheLayer": {
-          "info": "Gdy włączone, obrazy będą zapisywane lokalnie w pamięci podręcznej aby poprawić wydajność.",
-          "label": "Włącz pamięć podręczną obrazów"
+      "caches": {
+        "images": {
+          "label": "Włącz pamięć podręczną obrazów",
+          "info": "Gdy włączone, obrazy będą zapisywane lokalnie w pamięci podręcznej aby poprawić wydajność."
         }
       }
     },

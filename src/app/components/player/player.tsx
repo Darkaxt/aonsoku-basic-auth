@@ -5,6 +5,7 @@ import { MiniPlayerButton } from '@/app/components/mini-player/button'
 import { RadioInfo } from '@/app/components/player/radio-info'
 import { TrackInfo } from '@/app/components/player/track-info'
 import { podcasts } from '@/service/podcasts'
+import { useAppMediaCache } from '@/store/app.store'
 import {
   getVolume,
   usePlayerActions,
@@ -72,6 +73,16 @@ export function Player() {
   const song = currentList[currentSongIndex]
   const radio = radioList[currentSongIndex]
   const podcast = podcastList[currentSongIndex]
+
+  const mediaCacheEnabled = useAppMediaCache()
+  const songId = song?.id
+
+  const songStreamUrl = useMemo(() => {
+    if (!songId) return ''
+
+    const cacheBustToken = mediaCacheEnabled ? undefined : Date.now().toString()
+    return getSongStreamUrl(songId, undefined, undefined, cacheBustToken)
+  }, [songId, mediaCacheEnabled])
 
   const getAudioRef = useCallback(() => {
     if (isRadio) return radioRef
@@ -238,7 +249,7 @@ export function Player() {
       {isSong && song && (
         <AudioPlayer
           replayGain={trackReplayGain}
-          src={getSongStreamUrl(song.id)}
+          src={songStreamUrl}
           autoPlay={isPlaying}
           audioRef={audioRef}
           loop={loopState === LoopState.One}

@@ -1,4 +1,4 @@
-import { ImagesContent } from './images'
+import { CachesContent } from './caches'
 import { PodcastContent } from './podcast'
 import { SidebarContent } from './sidebar'
 
@@ -7,7 +7,7 @@ export function Content() {
     <div className="space-y-4">
       <SidebarContent />
       <PodcastContent />
-      <ImagesContent />
+      <CachesContent />
     </div>
   )
 }

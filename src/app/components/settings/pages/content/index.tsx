@@ -1,5 +1,5 @@
+import { CachesContent } from './caches'
 import { FeatureContent } from './features'
-import { ImagesContent } from './images'
 import { PodcastContent } from './podcast'
 import { SidebarContent } from './sidebar'
 
@@ -9,7 +9,7 @@ export function Content() {
       <SidebarContent />
       <FeatureContent />
       <PodcastContent />
-      <ImagesContent />
+      <CachesContent />
     </div>
   )
 }

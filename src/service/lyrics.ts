@@ -1,5 +1,6 @@
 import { get, set } from 'idb-keyval'
 import { httpClient } from '@/api/httpClient'
+import { useAppStore } from '@/store/app.store'
 import { usePlayerStore } from '@/store/player.store'
 import {
   ILyric,
@@ -30,6 +31,7 @@ interface LRCLibResponse {
 async function getLyrics(getLyricsData: GetLyricsData) {
   const { preferSyncedLyrics } = usePlayerStore.getState().settings.lyrics
   const { songLyricsEnabled } = getServerExtensions()
+  const cacheEnabled = useAppStore.getState().pages.lyricsCacheEnabled
 
   const cacheKey = getLyricsCacheKey(
     getLyricsData,
@@ -37,7 +39,12 @@ async function getLyrics(getLyricsData: GetLyricsData) {
     songLyricsEnabled,
   )
 
-  const cachedLyrics = await get(cacheKey)
+  const readCache = cacheEnabled ? (key: string) => get(key) : async () => undefined
+  const writeCache = cacheEnabled
+    ? (key: string, value: unknown) => set(key, value)
+    : () => undefined
+
+  const cachedLyrics = await readCache(cacheKey)
 
   if (cachedLyrics) {
     return cachedLyrics
@@ -70,7 +77,7 @@ async function getLyrics(getLyricsData: GetLyricsData) {
         if (syncedLyrics) {
           const serverSyncedLyrics = osStructuredLyricsToILyric(syncedLyrics)
 
-          set(cacheKey, serverSyncedLyrics)
+          writeCache(cacheKey, serverSyncedLyrics)
 
           return serverSyncedLyrics
         }
@@ -85,7 +92,7 @@ async function getLyrics(getLyricsData: GetLyricsData) {
     const lyrics = await getLyricsFromLRCLib(getLyricsData)
 
     if (lyrics.value !== '') {
-      set(cacheKey, lyrics)
+      writeCache(cacheKey, lyrics)
 
       return lyrics
     }
@@ -94,7 +101,7 @@ async function getLyrics(getLyricsData: GetLyricsData) {
   // if the server supported the songLyrics extension and lrc did not have lyrics, we don't need to query the server and lrc again.
   // so return the plain lyrics if we found them
   if (osUnsyncedLyricsFound) {
-    set(cacheKey, osUnsyncedLyricsFound)
+    writeCache(cacheKey, osUnsyncedLyricsFound)
 
     return osUnsyncedLyricsFound
   }
@@ -118,14 +125,14 @@ async function getLyrics(getLyricsData: GetLyricsData) {
     const lyrics = await getLyricsFromLRCLib(getLyricsData)
 
     if (lyrics.value !== '') {
-      set(cacheKey, lyrics)
+      writeCache(cacheKey, lyrics)
     }
 
     return lyrics
   }
 
   if (response?.data.lyrics) {
-    set(cacheKey, response.data.lyrics)
+    writeCache(cacheKey, response.data.lyrics)
   }
 
   return response?.data.lyrics

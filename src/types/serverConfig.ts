@@ -37,6 +37,10 @@ interface IAppPages {
   setArtistsPageViewType: (type: PageViewType) => void
   imagesCacheLayerEnabled: boolean
   setImagesCacheLayerEnabled: (value: boolean) => void
+  lyricsCacheEnabled: boolean
+  setLyricsCacheEnabled: (value: boolean) => void
+  mediaCacheEnabled: boolean
+  setMediaCacheEnabled: (value: boolean) => void
   isAllSectionsHidden: () => boolean
 }
 

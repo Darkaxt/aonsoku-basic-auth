@@ -723,12 +723,10 @@
         },
         "group": "Podcast"
       },
-      "images": {
-        "group": "Immagini",
-        "description": "Personalizza le impostazioni delle immagini.",
-        "cacheLayer": {
-          "info": "Quando abilitata, le immagini verranno memorizzate localmente per migliorare le prestazioni.",
-          "label": "Attiva Cache immagine"
+      "caches": {
+        "images": {
+          "label": "Attiva Cache immagine",
+          "info": "Quando abilitata, le immagini verranno memorizzate localmente per migliorare le prestazioni."
         }
       }
     },

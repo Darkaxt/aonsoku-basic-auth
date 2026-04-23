@@ -7,33 +7,36 @@ import IcecastMetadataStats from 'icecast-metadata-stats'
 
 export function RadioInfo({ radio }: { radio: Radio | undefined }) {
   const { t } = useTranslation()
-  const [radioMetadata , setRadioMetadata] = useState({title: null, artist: null})
+  const [radioMetadata , setRadioMetadata] = useState({title: "", artist: ""})
   const streamUrl = radio?.streamUrl
 
   useEffect(() => {
     if (!streamUrl) {
-      setRadioMetadata({title: null, artist: null})
+      setRadioMetadata({artist: "", title: ""})
       return
     }
     let iceListener: IcecastMetadataStats
+    let prevStreamTitle = ""
 
     try {
       iceListener = new IcecastMetadataStats(streamUrl, {
         interval: 10,
         onStats: (stats) => {
           const streamTitle = stats.StreamTitle ? stats.StreamTitle : stats.icy?.StreamTitle
-          if (streamTitle) {
+          if (streamTitle && prevStreamTitle !== streamTitle) {
+            prevStreamTitle = streamTitle
             const i = streamTitle.indexOf(' - ')
 
             if (i < 0) {
-              setRadioMetadata({title: streamTitle.trim(), artist: null})
+              setRadioMetadata({title: streamTitle.trim(), artist: ""})
             } else {
               const trackArtist = streamTitle.slice(0, i).trim()
               const trackTitle = streamTitle.slice(i + 3).trim()
               setRadioMetadata({title: trackTitle, artist: trackArtist})
             }
-          } else {
-            setRadioMetadata({title: null, artist: null})
+          } else if (prevStreamTitle !== streamTitle) {
+            prevStreamTitle = streamTitle
+            setRadioMetadata({title: "", artist: ""})
           }
         },
         sources: ['icy'],
@@ -41,14 +44,14 @@ export function RadioInfo({ radio }: { radio: Radio | undefined }) {
 
       iceListener.start()
     } catch {
-      setRadioMetadata({title: null, artist: null})
+      setRadioMetadata({title: "", artist: ""})
     }
 
     return () => {
       if (iceListener) {
         iceListener.stop()
       }
-      setRadioMetadata({title: null, artist: null})
+      setRadioMetadata({title: "", artist: ""})
     }
   }, [streamUrl])
 
@@ -66,14 +69,14 @@ export function RadioInfo({ radio }: { radio: Radio | undefined }) {
           <Fragment>
             <MarqueeTitle gap="mr-6" >
               <span className="text-sm font-medium" data-testid="radio-title">
-                { radioMetadata.title && radioMetadata.title !== "" ? radioMetadata.title : "—" }
+                { radioMetadata.title !== "" ? radioMetadata.title : "—" }
               </span>
             </MarqueeTitle>
             <span
               className="text-xs font-light text-muted-foreground"
               data-testid="radio-artist"
             >
-              { radioMetadata.artist && radioMetadata.artist !== "" ? radioMetadata.artist : "" }
+              { radioMetadata.artist }
             </span>
             <span
               className="text-xs font-light text-muted-foreground"

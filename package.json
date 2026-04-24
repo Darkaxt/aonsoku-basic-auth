@@ -81,6 +81,7 @@
     "html-to-text": "^9.0.5",
     "i18next": "^23.16.8",
     "i18next-browser-languagedetector": "^8.0.4",
+    "icecast-metadata-stats": "^0.1.12",
     "idb-keyval": "^6.2.2",
     "immer": "^10.1.1",
     "linkify-it": "^5.0.0",

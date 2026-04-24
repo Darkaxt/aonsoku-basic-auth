@@ -148,6 +148,9 @@ importers:
       i18next-browser-languagedetector:
         specifier: ^8.0.4
         version: 8.0.4
+      icecast-metadata-stats:
+        specifier: ^0.1.12
+        version: 0.1.12
       idb-keyval:
         specifier: ^6.2.2
         version: 6.2.2
@@ -2235,6 +2238,9 @@ packages:
       react: ^18 || ^19 || ^19.0.0-rc
       react-dom: ^18 || ^19 || ^19.0.0-rc
 
+  codec-parser@2.5.0:
+    resolution: {integrity: sha512-Ru9t80fV8B0ZiixQl8xhMTLru+dzuis/KQld32/x5T/+3LwZb0/YvQdSKytX9JqCnRdiupvAvyYJINKrXieziQ==}
+
   color-convert@2.0.1:
     resolution: {integrity: sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==}
     engines: {node: '>=7.0.0'}
@@ -2918,6 +2924,13 @@ packages:
 
   i18next@23.16.8:
     resolution: {integrity: sha512-06r/TitrM88Mg5FdUXAKL96dJMzgqLE5dv3ryBAra4KCwD9mJ4ndOTS95ZuymIGoE+2hzfdaMak2X11/es7ZWg==}
+
+  icecast-metadata-js@1.2.9:
+    resolution: {integrity: sha512-8YqPrJ4AjM64O28xF9TSUUFczxnTKwXwnIPmZKRxdbaZb6hn0nP+ke1OGNA+UsIfLpNRW4acDDBkIkbynYVQig==}
+
+  icecast-metadata-stats@0.1.12:
+    resolution: {integrity: sha512-qywYIIvxjAmZIFNUXMVZ/IgIJh87z0W6oOmJ5htPw3SUauXcYoY6rRexvzN5Ibct8hXsqoTcB+k8m6Wa53bfJg==}
+    engines: {node: '>=18.0.0'}
 
   iconv-corefoundation@1.1.7:
     resolution: {integrity: sha512-T10qvkw0zz4wnm560lOEg0PovVqUXuOFhhHAkixw8/sycy7TJt7v/RrkEKEQnAw2viPSJu6iAkErxnzR0g8PpQ==}
@@ -6480,6 +6493,8 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
+  codec-parser@2.5.0: {}
+
   color-convert@2.0.1:
     dependencies:
       color-name: 1.1.4
@@ -7390,6 +7405,14 @@ snapshots:
   i18next@23.16.8:
     dependencies:
       '@babel/runtime': 7.27.0
+
+  icecast-metadata-js@1.2.9:
+    dependencies:
+      codec-parser: 2.5.0
+
+  icecast-metadata-stats@0.1.12:
+    dependencies:
+      icecast-metadata-js: 1.2.9
 
   iconv-corefoundation@1.1.7:
     dependencies:

@@ -18,7 +18,7 @@ body:
     attributes:
       label: Aonsoku BasicAuth version
       description: What version of this fork are you running?
-      placeholder: ex. 0.14.0-ba.1
+      placeholder: ex. 0.14.0-ba.2
     validations:
       required: true
 

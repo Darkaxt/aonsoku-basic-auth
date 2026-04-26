@@ -169,6 +169,7 @@ describe('Player Component', () => {
 
   it('should mount the player and toggle the loop button', () => {
     cy.fixture('songs/random').then((songs: ISong[]) => {
+      usePlayerStore.getState().actions.clearPlayerState()
       usePlayerStore.getState().actions.setSongList(songs, 0)
       usePlayerStore.getState().actions.setPlayingState(false)
 
@@ -189,11 +190,26 @@ describe('Player Component', () => {
 
       cy.get('@loopButton').should('have.class', 'player-button-active')
 
-      cy.getByTestId<HTMLAudioElement>('player-song-audio').then(($audio) => {
-        const $el = $audio[0]
+      cy.getByTestId<HTMLAudioElement>('player-song-audio').should(
+        ($audio) => {
+          const $el = $audio[0]
 
-        expect($el.loop, 'Loop state should be true').to.equal(true)
-      })
+          expect($el.loop, 'Repeat all should not set native audio loop').to
+            .equal(false)
+        },
+      )
+
+      cy.get('@loopButton').click()
+
+      cy.getByTestId<HTMLAudioElement>('player-song-audio').should(
+        ($audio) => {
+          const $el = $audio[0]
+
+          expect($el.loop, 'Repeat one should set native audio loop').to.equal(
+            true,
+          )
+        },
+      )
     })
   })
 
@@ -214,6 +230,53 @@ describe('Player Component', () => {
         expect(interception.request.method, 'Request method').to.equal('GET')
         expect(interception.response?.statusCode, 'Status code').to.equal(200)
       })
+    })
+  })
+
+  it('should request a supported transcode format for m4a songs', () => {
+    cy.fixture('songs/random').then((songs: ISong[]) => {
+      const m4aSong = {
+        ...songs[1],
+        suffix: 'm4a',
+        contentType: 'audio/mp4',
+      }
+
+      usePlayerStore.getState().actions.clearPlayerState()
+      usePlayerStore.getState().actions.setSongList([m4aSong], 0)
+      usePlayerStore.getState().actions.setPlayingState(false)
+
+      cy.mount(<Player />)
+
+      cy.getByTestId<HTMLAudioElement>('player-song-audio').should(
+        ($audio) => {
+          const src = new URL($audio[0].src)
+
+          expect(src.searchParams.get('format')).to.equal('opus')
+        },
+      )
+    })
+  })
+
+  it('should use song duration when stream metadata has an infinite duration', () => {
+    cy.fixture('songs/random').then((songs: ISong[]) => {
+      usePlayerStore.getState().actions.clearPlayerState()
+      usePlayerStore.getState().actions.setSongList([songs[1]], 0)
+      usePlayerStore.getState().actions.setPlayingState(false)
+
+      cy.mount(<Player />)
+
+      cy.getByTestId<HTMLAudioElement>('player-song-audio').then(($audio) => {
+        const audio = $audio[0]
+
+        Object.defineProperty(audio, 'duration', {
+          configurable: true,
+          get: () => Infinity,
+        })
+
+        audio.dispatchEvent(new Event('loadedmetadata'))
+      })
+
+      cy.getByTestId('player-duration-time').should('have.text', '03:24')
     })
   })
 

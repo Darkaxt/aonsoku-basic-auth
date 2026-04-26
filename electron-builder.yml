@@ -2,7 +2,7 @@ appId: eu.remaxku.aonsoku.basicauth
 productName: Aonsoku BasicAuth
 copyright: Copyright © 2026 Victor Alves
 icon: ./build/icon.ico
-artifactName: '${productName}-v${version}-${os}-${arch}.${ext}'
+artifactName: 'Aonsoku-BasicAuth-v${version}-${os}-${arch}.${ext}'
 
 directories:
   buildResources: build

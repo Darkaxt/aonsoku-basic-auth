@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Support scope
+    url: https://github.com/Darkaxt/aonsoku-basic-auth#support-scope
+    about: This fork only tracks reverse-proxy BasicAuth and proxy-auth issues.

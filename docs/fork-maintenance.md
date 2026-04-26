@@ -1,6 +1,6 @@
 # Aonsoku BasicAuth Fork Maintenance
 
-This private fork carries a narrow reverse-proxy BasicAuth patch on top of
+This public fork carries a narrow reverse-proxy BasicAuth patch on top of
 `victoralvesf/aonsoku:main`.
 
 ## Patch invariants

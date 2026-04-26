@@ -1,0 +1,37 @@
+name: BasicAuth/proxy-auth feature request
+description: Request a reverse-proxy BasicAuth or proxy-auth feature for this fork.
+title: '[BasicAuth Feature]: '
+labels: ['enhancement', 'basic-auth', 'proxy-auth']
+body:
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This request is about reverse-proxy BasicAuth/proxy-auth behavior in this fork.
+          required: true
+        - label: I have already checked existing requests and found no duplicate.
+          required: true
+
+  - type: dropdown
+    id: proxy-area
+    attributes:
+      label: Proxy-auth area
+      options:
+        - Server configuration fields
+        - Header injection
+        - Images or album art
+        - Playback or streaming
+        - Downloads
+        - Automation or releases
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: What BasicAuth/proxy-auth behavior do you want added?
+      placeholder: Describe the proxy-auth use case, expected behavior, and affected server/proxy.
+    validations:
+      required: true

@@ -1,10 +1,10 @@
 # Upstream Issue Notes
 
-This private fork intentionally focuses on reverse-proxy BasicAuth first.
+This public fork intentionally focuses on reverse-proxy BasicAuth first.
 
 ## Covered privately
 
-- victoralvesf/aonsoku#252 - Basic auth support.
+- victoralvesf/aonsoku#252 - Basic auth support, covered in this fork.
 
 ## Good follow-up candidates
 

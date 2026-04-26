@@ -2,7 +2,7 @@
 
 # Aonsoku BasicAuth
 
-Private Aonsoku fork with reverse-proxy BasicAuth support for Traefik,
+Unofficial Aonsoku fork with reverse-proxy BasicAuth support for Traefik,
 Authentik, Pangolin, nginx, Caddy, and similar servers.
 
 This fork preserves upstream Aonsoku's MIT license and attribution. The only
@@ -10,22 +10,28 @@ intended fork-specific feature is desktop Electron support for a separate
 reverse-proxy BasicAuth username and password, stored through Electron
 `safeStorage` and injected only for the configured server origin.
 
+## Support Scope
+
+This repository only tracks this fork's reverse-proxy BasicAuth and proxy-auth
+behavior. General Aonsoku bugs, feature requests, server issues, and packaging
+requests outside this fork's published prereleases are out of scope here.
+
 <br />
 <div align="center">
   <a href="https://github.com/victoralvesf/aonsoku">
     <img src="./resources/icons/icon.png" alt="Aonsoku" width="80" height="80">
   </a>
 
-  <h3 align="center">Aonsoku</h3>
+  <h3 align="center">Aonsoku BasicAuth</h3>
   <p align="center">
-    A modern desktop client for Navidrome/Subsonic servers built with React and Electron.
+    Unofficial BasicAuth-only fork of the Aonsoku desktop client.
     <br />
     <br />
-    <a href="https://aonsoku.vercel.app">Web App</a>
+    <a href="https://github.com/Darkaxt/aonsoku-basic-auth/releases/latest">Download</a>
     ·
-    <a href="https://github.com/victoralvesf/aonsoku/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    <a href="https://github.com/Darkaxt/aonsoku-basic-auth/issues/new?labels=bug,basic-auth,proxy-auth&template=02-bug_report.yml">Report BasicAuth Bug</a>
     ·
-    <a href="https://github.com/victoralvesf/aonsoku/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="#support-scope">Support Scope</a>
   </p>
 
   [![React][React.js]][React-url] [![Electron][Electron]][Electron-url]
@@ -222,7 +228,7 @@ sudo codesign --force --deep --sign - /Applications/Aonsoku.app
 - [x] Synced lyrics
 - [x] Podcast support
 
-Feel free to request more cool features [here](https://github.com/victoralvesf/aonsoku/issues/new?labels=enhancement&template=feature-request---.md).
+General Aonsoku feature requests are out of scope for this BasicAuth-only fork.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -284,6 +290,6 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 [Electron]: https://img.shields.io/badge/Electron-000000?style=for-the-badge&logo=electron&logoColor=9FEAF9
 [Electron-url]: https://www.electronjs.org/
 [Download-badge]: ./.github/assets/github.svg
-[Download-url]: https://github.com/victoralvesf/aonsoku/releases/latest
+[Download-url]: https://github.com/Darkaxt/aonsoku-basic-auth/releases/latest
 [Flathub-badge]: ./.github/assets/flathub.svg
 [Flathub-url]: https://flathub.org/apps/io.github.victoralvesf.aonsoku

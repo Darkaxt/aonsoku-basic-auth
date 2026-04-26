@@ -1,0 +1,104 @@
+name: BasicAuth bug report
+description: Report a reverse-proxy BasicAuth or proxy-auth issue in this fork.
+title: '[BasicAuth Bug]: '
+labels: ['bug', 'basic-auth', 'proxy-auth']
+body:
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This issue is about reverse-proxy BasicAuth/proxy-auth behavior in this fork.
+          required: true
+        - label: I have already checked existing issues and found no duplicate.
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Aonsoku BasicAuth version
+      description: What version of this fork are you running?
+      placeholder: ex. 0.14.0-ba.1
+    validations:
+      required: true
+
+  - type: input
+    id: server-version
+    attributes:
+      label: Music server and version
+      description: What music server are you using?
+      placeholder: ex. Navidrome v0.55.0, Gonic, Subsonic, etc.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: proxy
+    attributes:
+      label: Reverse proxy
+      options:
+        - Traefik
+        - nginx
+        - Caddy
+        - Apache
+        - Authelia
+        - Authentik
+        - Cloudflare Access
+        - Pangolin
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: proxy-auth-mode
+    attributes:
+      label: Proxy auth setup
+      options:
+        - Dedicated proxy BasicAuth fields
+        - URL credentials migration
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      multiple: true
+      options:
+        - Desktop Windows
+        - Desktop macOS
+        - Desktop Linux
+        - Web
+        - Docker
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us what you expected to happen.
+      placeholder: Include screenshots and redacted error logs if possible.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Go to '...'
+        2. Fill in '...'
+        3. Click '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted log output
+      description: Paste relevant logs with passwords, tokens, cookies, and BasicAuth headers removed.
+      render: shell

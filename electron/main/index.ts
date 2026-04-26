@@ -32,7 +32,7 @@ if (!instanceLock) {
   })
 
   app.whenReady().then(() => {
-    electronApp.setAppUserModelId('com.victoralvesf.aonsoku')
+    electronApp.setAppUserModelId('eu.remaxku.aonsoku.basicauth')
 
     initAutoUpdater()
     createWindow()

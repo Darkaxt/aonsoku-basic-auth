@@ -1,5 +1,5 @@
-appId: com.victoralvesf.aonsoku
-productName: Aonsoku
+appId: eu.remaxku.aonsoku.basicauth
+productName: Aonsoku BasicAuth
 copyright: Copyright © 2026 Victor Alves
 icon: ./build/icon.ico
 artifactName: '${productName}-v${version}-${os}-${arch}.${ext}'
@@ -18,7 +18,7 @@ extraResources:
     to: resources
 
 win:
-  executableName: Aonsoku
+  executableName: Aonsoku BasicAuth
   target:
     - target: nsis
       arch:
@@ -66,5 +66,5 @@ nativeRebuilder: legacy
 
 publish:
   provider: github
-  owner: victoralvesf
-  repo: aonsoku
+  owner: Darkaxt
+  repo: aonsoku-basic-auth

@@ -1,14 +1,14 @@
 {
-  "name": "aonsoku",
+  "name": "aonsoku-basic-auth",
   "private": true,
-  "version": "0.14.0",
-  "description": "A modern desktop client for Navidrome/Subsonic servers.",
+  "version": "0.14.0-ba.1",
+  "description": "Private Aonsoku fork with reverse-proxy BasicAuth support.",
   "author": {
     "name": "Victor Alves"
   },
   "main": "./out/main/index.js",
   "type": "module",
-  "productName": "Aonsoku",
+  "productName": "Aonsoku BasicAuth",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -17,8 +17,10 @@
     "lint:fix": "biome lint --write",
     "lint:check": "biome check --write",
     "lint:format": "biome format --write",
+    "check:proxy-auth-secrets": "node scripts/check-basic-auth-secrets.mjs",
     "cy:open": "cypress open",
     "test": "cypress run --component",
+    "test:proxy-auth": "node --test scripts/tests/proxy-auth.test.mjs",
     "electron:start": "electron-vite preview",
     "electron:dev": "electron-vite dev --watch",
     "electron:build": "electron-vite build",
@@ -30,10 +32,12 @@
     "ci:build:win": "electron-builder --win --publish always",
     "ci:build:mac": "electron-builder --mac --publish always",
     "ci:build:linux": "electron-builder --linux --publish always",
+    "release:basic-auth:gates": "node scripts/run-basic-auth-release-gates.mjs --full",
+    "smoke:basic-auth": "node scripts/basic-auth-smoke.mjs",
     "prepare": "husky"
   },
   "repository": {
-    "url": "https://github.com/victoralvesf/aonsoku"
+    "url": "https://github.com/Darkaxt/aonsoku-basic-auth"
   },
   "dependencies": {
     "@chriscodesthings/random-css-hex-color": "^1.1.0",

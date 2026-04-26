@@ -47,6 +47,7 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
             username: genUser(),
             password: genPassword(),
             authType: getAuthType(),
+            proxyAuth: undefined,
             protocolVersion: '1.16.0',
             serverType: SERVER_TYPE ?? 'subsonic',
             logoutDialogState: false,
@@ -304,7 +305,14 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
                 state.data.password = value
               })
             },
-            saveConfig: async ({ url, username, password }: IServerConfig) => {
+            saveConfig: async (
+              { url, username, password, proxyAuth }: IServerConfig,
+              options,
+            ) => {
+              const headers = options?.proxyAuthHeader
+                ? { Authorization: options.proxyAuthHeader }
+                : undefined
+
               // try both token and password methods
               for (const authType of [AuthType.TOKEN, AuthType.PASSWORD]) {
                 const token =
@@ -317,9 +325,11 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
                   username,
                   token,
                   authType,
+                  undefined,
+                  headers,
                 )
 
-                const serverInfo = await queryServerInfo(url)
+                const serverInfo = await queryServerInfo(url, headers)
 
                 if (canConnect) {
                   set((state) => {
@@ -327,6 +337,7 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
                     state.data.username = username
                     state.data.password = token
                     state.data.authType = authType
+                    state.data.proxyAuth = proxyAuth
                     state.data.protocolVersion = serverInfo.protocolVersion
                     state.data.serverType = serverInfo.serverType
                     state.data.isServerConfigured = true
@@ -349,6 +360,7 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
                 state.data.username = ''
                 state.data.password = ''
                 state.data.authType = AuthType.TOKEN
+                state.data.proxyAuth = undefined
                 state.data.protocolVersion = '1.16.0'
                 state.data.serverType = 'subsonic'
                 state.data.songCount = null

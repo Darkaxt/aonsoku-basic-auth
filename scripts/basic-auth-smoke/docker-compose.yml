@@ -1,0 +1,19 @@
+services:
+  navidrome:
+    image: deluan/navidrome:latest
+    environment:
+      ND_ENABLETRANSCODINGCONFIG: "false"
+      ND_SCANSCHEDULE: "0"
+    volumes:
+      - ./data:/data
+
+  traefik:
+    image: traefik:v3.3
+    command:
+      - --providers.file.filename=/etc/traefik/dynamic.yml
+      - --entrypoints.web.address=:80
+    ports:
+      - 127.0.0.1:38080:80
+    volumes:
+      - ./auth:/auth:ro
+      - ./traefik-dynamic.yml:/etc/traefik/dynamic.yml:ro

@@ -6,6 +6,10 @@ import { colorsState } from './core/colors'
 import { setupDownloads } from './core/downloads'
 import { setupEvents, setupIpcEvents } from './core/events'
 import { appIcon } from './core/icon'
+import {
+  installProxyAuthInterceptor,
+  setupProxyAuthIpc,
+} from './core/proxy-auth'
 import { titleBarOverlay } from './core/titleBarOverlay'
 import { setUpdaterWindow } from './core/updater'
 import { StatefulBrowserWindow } from './core/windowPosition'
@@ -41,6 +45,8 @@ export function createWindow(): void {
   })
 
   createTray()
+  installProxyAuthInterceptor(mainWindow.webContents.session)
+  setupProxyAuthIpc()
   setupEvents(mainWindow)
   setupIpcEvents(mainWindow)
   setupDownloads(mainWindow)

@@ -1,5 +1,15 @@
 <a id="readme-top"></a>
 
+# Aonsoku BasicAuth
+
+Private Aonsoku fork with reverse-proxy BasicAuth support for Traefik,
+Authentik, Pangolin, nginx, Caddy, and similar servers.
+
+This fork preserves upstream Aonsoku's MIT license and attribution. The only
+intended fork-specific feature is desktop Electron support for a separate
+reverse-proxy BasicAuth username and password, stored through Electron
+`safeStorage` and injected only for the configured server origin.
+
 <br />
 <div align="center">
   <a href="https://github.com/victoralvesf/aonsoku">

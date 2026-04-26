@@ -2,7 +2,7 @@ import { AuthType } from '@/types/serverConfig'
 import { appName } from '@/utils/appName'
 import { authQueryParams } from './httpClient'
 
-export async function queryServerInfo(url: string) {
+export async function queryServerInfo(url: string, headers?: HeadersInit) {
   try {
     const query = {
       ...authQueryParams('dummy', 'dummy', AuthType.PASSWORD), // Use dummy credentials, we don't want to actually be logged in
@@ -14,6 +14,7 @@ export async function queryServerInfo(url: string) {
     const queries = new URLSearchParams(query).toString()
 
     const response = await fetch(`${url}/rest/ping.view?${queries}`, {
+      headers,
       method: 'GET',
     })
     const data = await response.json()
@@ -24,6 +25,7 @@ export async function queryServerInfo(url: string) {
       const response = await fetch(
         `${url}/rest/getOpenSubsonicExtensions.view?${queries}`,
         {
+          headers,
           method: 'GET',
         },
       )

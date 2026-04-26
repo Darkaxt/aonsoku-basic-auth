@@ -1,4 +1,5 @@
 import { SettingsOptions } from '@/app/components/settings/options'
+import { ProxyBasicAuthConfig } from '@/utils/proxy-auth'
 
 export enum AuthType {
   PASSWORD,
@@ -9,6 +10,7 @@ export interface IServerConfig {
   url: string
   username: string
   password: string
+  proxyAuth?: ProxyBasicAuthConfig
   protocolVersion?: string
   serverType?: string
   extensionsSupported?: Record<string, number[]>
@@ -55,7 +57,10 @@ export interface IAppActions {
   setUrl: (value: string) => void
   setUsername: (value: string) => void
   setPassword: (value: string) => void
-  saveConfig: (data: IServerConfig) => Promise<boolean>
+  saveConfig: (
+    data: IServerConfig,
+    options?: { proxyAuthHeader?: string },
+  ) => Promise<boolean>
   removeConfig: () => void
   setLogoutDialogState: (value: boolean) => void
 }

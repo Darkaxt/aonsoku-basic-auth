@@ -62,6 +62,12 @@ const api: IAonsokuAPI = {
   saveAppSettings: (payload) => {
     ipcRenderer.send(IpcChannels.SaveAppSettings, payload)
   },
+  setProxyAuthSecret: (password) =>
+    ipcRenderer.invoke(IpcChannels.SetProxyAuthSecret, password),
+  removeProxyAuthSecret: () =>
+    ipcRenderer.send(IpcChannels.RemoveProxyAuthSecret),
+  syncProxyAuth: (payload) =>
+    ipcRenderer.invoke(IpcChannels.SyncProxyAuth, payload),
   checkForUpdates: () => ipcRenderer.invoke(IpcChannels.CheckForUpdates),
   downloadUpdate: () => ipcRenderer.send(IpcChannels.DownloadUpdate),
   quitAndInstall: () => ipcRenderer.send(IpcChannels.QuitAndInstall),

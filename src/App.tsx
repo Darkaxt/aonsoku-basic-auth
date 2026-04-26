@@ -4,6 +4,7 @@ import { Linux } from '@/app/components/controls/linux'
 import { SettingsDialog } from '@/app/components/settings/dialog'
 import { LangObserver } from '@/app/observers/lang-observer'
 import { MediaSessionObserver } from '@/app/observers/media-session-observer'
+import { ProxyAuthObserver } from '@/app/observers/proxy-auth-observer'
 import { ThemeObserver } from '@/app/observers/theme-observer'
 import { ToastContainer } from '@/app/observers/toast-container'
 import { UpdateObserver } from '@/app/observers/update-observer'
@@ -17,6 +18,7 @@ function App() {
   return (
     <>
       {isElectron() && <UpdateObserver />}
+      <ProxyAuthObserver />
       <MediaSessionObserver />
       <LangObserver />
       <ThemeObserver />

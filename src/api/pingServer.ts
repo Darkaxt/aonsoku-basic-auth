@@ -8,6 +8,7 @@ export async function pingServer(
   password: string,
   authType: AuthType,
   protocolVersion?: string,
+  headers?: HeadersInit,
 ): Promise<boolean> {
   try {
     const query = {
@@ -20,6 +21,7 @@ export async function pingServer(
     const queries = new URLSearchParams(query).toString()
 
     const response = await fetch(`${url}/rest/ping.view?${queries}`, {
+      headers,
       method: 'GET',
     })
     const data = await response.json()
@@ -37,6 +39,7 @@ export async function pingServer(
         password,
         authType,
         data['subsonic-response'].version,
+        headers,
       )
     }
 

@@ -34,3 +34,6 @@ env-config.js
 out
 
 .pnpm-store/*
+
+scripts/basic-auth-smoke/auth/
+scripts/basic-auth-smoke/data/

@@ -1,0 +1,20 @@
+http:
+  routers:
+    navidrome:
+      entryPoints:
+        - web
+      middlewares:
+        - navidrome-auth
+      rule: PathPrefix(`/`)
+      service: navidrome
+
+  middlewares:
+    navidrome-auth:
+      basicAuth:
+        usersFile: /auth/htpasswd
+
+  services:
+    navidrome:
+      loadBalancer:
+        servers:
+          - url: http://navidrome:4533

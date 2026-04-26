@@ -27,6 +27,9 @@ export enum IpcChannels {
   SetDiscordRpcActivity = 'set-discord-rpc-activity',
   ClearDiscordRpcActivity = 'clear-discord-rpc-activity',
   SaveAppSettings = 'save-app-settings',
+  SetProxyAuthSecret = 'set-proxy-auth-secret',
+  RemoveProxyAuthSecret = 'remove-proxy-auth-secret',
+  SyncProxyAuth = 'sync-proxy-auth',
   CheckForUpdates = 'check-for-updates',
   DownloadUpdate = 'download-update',
   QuitAndInstall = 'quit-and-install',
@@ -57,6 +60,12 @@ export type PlayerStateListenerActions =
   | 'toggleShuffle'
   | 'toggleRepeat'
 
+export interface ProxyAuthSyncPayload {
+  enabled: boolean
+  origins: string[]
+  username: string
+}
+
 export interface IAonsokuAPI {
   enterFullScreen: () => void
   exitFullScreen: () => void
@@ -81,6 +90,9 @@ export interface IAonsokuAPI {
   setDiscordRpcActivity: (payload: RpcPayload) => void
   clearDiscordRpcActivity: () => void
   saveAppSettings: (payload: ISettingPayload) => void
+  setProxyAuthSecret: (password: string) => Promise<boolean>
+  removeProxyAuthSecret: () => void
+  syncProxyAuth: (payload: ProxyAuthSyncPayload) => Promise<void>
   checkForUpdates: () => Promise<UpdateCheckResult | null>
   downloadUpdate: () => void
   quitAndInstall: () => void

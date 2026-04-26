@@ -387,6 +387,12 @@
       "username": "Username",
       "usernamePlaceholder": "Your username",
       "password": "Password",
+      "proxyAuth": {
+        "enabled": "Reverse-proxy Basic Auth",
+        "description": "Use separate proxy credentials for Traefik, Authentik, Pangolin, nginx, Caddy, or similar servers.",
+        "username": "Proxy username",
+        "password": "Proxy password"
+      },
       "connect": "Connect",
       "connecting": "Connecting…",
       "validations": {
@@ -395,14 +401,18 @@
         "username": "Please provide a username",
         "usernameLength": "Username must be at least 2 characters.",
         "password": "Please provide a password",
-        "passwordLength": "Password must be at least 2 characters."
+        "passwordLength": "Password must be at least 2 characters.",
+        "proxyUsername": "Please provide the proxy username",
+        "proxyPassword": "Please provide the proxy password"
       }
     }
   },
   "toast": {
     "server": {
       "success": "Server was saved successfully!",
-      "error": "Server communication failed!"
+      "error": "Server communication failed!",
+      "proxyAuthUnavailable": "Proxy Basic Auth requires the desktop app.",
+      "proxyAuthSecretError": "Proxy Basic Auth could not be saved securely on this system."
     }
   },
   "command": {

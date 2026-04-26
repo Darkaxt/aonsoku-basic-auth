@@ -14,6 +14,7 @@ import {
 import { ROUTES } from '@/routes/routesList'
 import { useAppActions, useAppStore } from '@/store/app.store'
 import { usePlayerActions } from '@/store/player.store'
+import { isDesktop } from '@/utils/desktop'
 
 interface AlertDialogProps {
   openDialog: boolean
@@ -34,6 +35,9 @@ export function LogoutConfirmDialog({
 
   function handleRemoveConfig(e: MouseEvent<HTMLButtonElement>) {
     e.preventDefault()
+    if (isDesktop()) {
+      window.api.removeProxyAuthSecret()
+    }
     removeConfig()
     clearPlayerState()
     resetConfig()

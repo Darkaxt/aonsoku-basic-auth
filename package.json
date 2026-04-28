@@ -1,7 +1,7 @@
 {
   "name": "aonsoku-basic-auth",
   "private": true,
-  "version": "0.14.0-ba.2",
+  "version": "0.14.0-ba.3",
   "description": "Unofficial Aonsoku fork with reverse-proxy BasicAuth support.",
   "author": {
     "name": "Victor Alves"
@@ -20,7 +20,7 @@
     "check:proxy-auth-secrets": "node scripts/check-basic-auth-secrets.mjs",
     "cy:open": "cypress open",
     "test": "cypress run --component",
-    "test:proxy-auth": "node --test scripts/tests/proxy-auth.test.mjs",
+    "test:proxy-auth": "node --test scripts/tests/proxy-auth.test.mjs scripts/tests/audio-engine.test.mjs",
     "electron:start": "electron-vite preview",
     "electron:dev": "electron-vite dev --watch",
     "electron:build": "electron-vite build",
@@ -90,6 +90,7 @@
     "linkify-it": "^5.0.0",
     "lodash": "^4.17.23",
     "lucide-react": "^0.563.0",
+    "node-mpv": "github:jeffvli/Node-MPV#32b4d64395289ad710c41d481d2707a7acfc228f",
     "react": "^18.3.1",
     "react-country-flag": "^3.1.0",
     "react-device-detect": "^2.2.3",
@@ -144,7 +145,11 @@
     "vite": "^7.3.1"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["cypress", "electron", "esbuild"],
+    "onlyBuiltDependencies": [
+      "cypress",
+      "electron",
+      "esbuild"
+    ],
     "overrides": {
       "brace-expansion": "^2.0.2",
       "glob": "^11.0.0",

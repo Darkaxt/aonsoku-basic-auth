@@ -1,7 +1,7 @@
 # Aonsoku BasicAuth Fork Maintenance
 
-This public fork carries a narrow reverse-proxy BasicAuth patch on top of
-`victoralvesf/aonsoku:main`.
+This public fork carries reverse-proxy BasicAuth support and a desktop MPV song
+engine patch on top of `victoralvesf/aonsoku:main`.
 
 ## Patch invariants
 
@@ -19,6 +19,13 @@ This public fork carries a narrow reverse-proxy BasicAuth patch on top of
   header auth safe.
 - Treat desktop Electron as the supported v1 target. Web/Docker should continue
   to work without proxy BasicAuth persistence.
+- Desktop song playback is MPV-first. Web audio remains for web builds,
+  radio, podcasts, and visible fallback when MPV cannot start or load a stream.
+- MPV must receive proxy BasicAuth only from Electron main using the
+  safeStorage-backed secret. Do not pass proxy credentials through renderer
+  state, URL userinfo, command-line args, or logs.
+- MPV is not bundled in v1. Users install `mpv` or configure an MPV binary path
+  in Audio settings.
 
 ## Current patch map
 
@@ -27,6 +34,10 @@ This public fork carries a narrow reverse-proxy BasicAuth patch on top of
 - Store/types: `src/store/app.store.ts`, `src/types/serverConfig.ts`
 - Main-process secret storage and header injection:
   `electron/main/core/proxy-auth.ts`
+- MPV playback bridge: `electron/main/core/mpvPlayer.ts`,
+  `src/app/components/player/mpv-audio.tsx`
+- Audio engine selection: `src/utils/audio-engine.ts`,
+  `src/app/components/settings/pages/audio/audio-engine.tsx`
 - Renderer-to-main sync: `src/utils/proxy-auth-sync.ts`,
   `src/app/observers/proxy-auth-observer.tsx`, route loaders
 - Release gates and smoke harness: `scripts/*basic-auth*`
@@ -38,7 +49,7 @@ This public fork carries a narrow reverse-proxy BasicAuth patch on top of
    `docs/upstream-sync-state.json:lastSyncedUpstreamSha`.
 2. If unchanged, run the lightweight gates and stop.
 3. If changed, create a new sync branch from `upstream/main`.
-4. Reapply the BasicAuth patch using the invariants above.
+4. Reapply the BasicAuth and MPV patches using the invariants above.
 5. Run the release gates. Do not publish if any gate is red.
 6. If green, update `docs/upstream-sync-state.json`, bump the fork version to
    `<upstream-version>-ba.<run>`, merge to the private release branch, push, and
@@ -49,12 +60,16 @@ This public fork carries a narrow reverse-proxy BasicAuth patch on top of
 Use `node scripts/run-basic-auth-release-gates.mjs --full` for release
 candidates. It runs:
 
-- BasicAuth helper tests.
+- BasicAuth and audio-engine helper tests.
 - Web and Electron builds.
 - Biome lint.
 - Secret-redaction scan.
 - Traefik/Navidrome BasicAuth smoke harness.
 - Windows package build.
+
+Manual desktop release smoke must include MPV installed/configured, a protected
+Navidrome server, and direct playback of a high-resolution FLAC without server
+transcoding.
 
 The smoke harness starts Navidrome behind Traefik BasicAuth and verifies that an
 unauthenticated request gets `401` while an authenticated request reaches the

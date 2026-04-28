@@ -3,6 +3,7 @@ import { IpcChannels } from '../../preload/types'
 import type { ProxyAuthSyncPayload } from '../../preload/types'
 import {
   createProxyAuthHeaderForRequest,
+  createMpvHttpHeaderFieldsForRequest,
   PROXY_BASIC_AUTH_SECRET_KEY,
   ProxyAuthRequestConfig,
 } from '../../../src/utils/proxy-auth'
@@ -89,6 +90,10 @@ export function setupProxyAuthIpc() {
   ipcMain.handle(IpcChannels.SyncProxyAuth, (_event, config: ProxyAuthSyncPayload) => {
     syncProxyAuth(config)
   })
+}
+
+export function getMpvProxyAuthHeaderFields(requestUrl: string): string[] {
+  return createMpvHttpHeaderFieldsForRequest(requestUrl, activeProxyAuth)
 }
 
 export function installProxyAuthInterceptor(session: Session) {

@@ -1,6 +1,8 @@
 # Upstream Issue Notes
 
-This public fork intentionally focuses on reverse-proxy BasicAuth first.
+This public fork intentionally focuses on reverse-proxy BasicAuth first, with a
+desktop MPV playback exception because Chromium/Web audio failures can make the
+client unusable for lossless libraries.
 
 ## Covered privately
 
@@ -8,14 +10,17 @@ This public fork intentionally focuses on reverse-proxy BasicAuth first.
 - victoralvesf/aonsoku#389 - ALAC `.m4a` playback via server-side `opus`
   transcoding and metadata duration fallback, carried from upstream
   `development` for `0.14.0-ba.2`.
+- High-resolution/lossless song playback stability - this fork now defaults
+  desktop song playback to MPV in `0.14.0-ba.3`, while keeping Web audio for
+  web builds, radio, podcasts, and fallback.
 
 ## Reviewed but not claimed fixed
 
 - victoralvesf/aonsoku#366 - Last seconds of songs being cut off. The current
-  player advances on the native audio `ended` event, so this does not have an
-  obvious low-risk app-side one-line fix without reproducing the stream/media
-  failure. The ALAC/duration fallback above may help related transcoded-stream
-  cases, but it should not be presented as a verified fix for this issue.
+  upstream player advances on the native audio `ended` event. The MPV desktop
+  engine should reduce this class of Web-audio failure, but it should not be
+  presented as a verified #366 fix until reproduced and smoke-tested against
+  the affected media.
 
 ## Good follow-up candidates
 

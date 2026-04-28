@@ -107,3 +107,72 @@ test('redactProxyAuthFromText redacts Basic headers and URL credentials', () => 
     'Authorization: Basic <redacted> https://<proxy-auth>@example.test/rest',
   )
 })
+
+test('createMpvHttpHeaderFieldsForRequest creates MPV Authorization header fields for matching origins', () => {
+  const username = 'björn'
+  const password = 'påss'
+
+  assert.deepEqual(
+    proxyAuth.createMpvHttpHeaderFieldsForRequest(
+      'https://proxy.example.test/rest/stream.view?id=1',
+      {
+        enabled: true,
+        origins: ['https://proxy.example.test'],
+        password,
+        username,
+      },
+    ),
+    [
+      `Authorization: Basic ${Buffer.from(`${username}:${password}`, 'utf8').toString('base64')}`,
+    ],
+  )
+})
+
+test('createMpvHttpHeaderFieldsForRequest skips disabled, incomplete, and nonmatching origins', () => {
+  assert.deepEqual(
+    proxyAuth.createMpvHttpHeaderFieldsForRequest(
+      'https://proxy.example.test/rest/stream.view?id=1',
+      {
+        enabled: false,
+        origins: ['https://proxy.example.test'],
+        password: 'proxy-pass',
+        username: 'proxy-user',
+      },
+    ),
+    [],
+  )
+
+  assert.deepEqual(
+    proxyAuth.createMpvHttpHeaderFieldsForRequest(
+      'https://proxy.example.test/rest/stream.view?id=1',
+      {
+        enabled: true,
+        origins: ['https://proxy.example.test'],
+        username: 'proxy-user',
+      },
+    ),
+    [],
+  )
+
+  assert.deepEqual(
+    proxyAuth.createMpvHttpHeaderFieldsForRequest(
+      'https://other.example.test/rest/stream.view?id=1',
+      {
+        enabled: true,
+        origins: ['https://proxy.example.test'],
+        password: 'proxy-pass',
+        username: 'proxy-user',
+      },
+    ),
+    [],
+  )
+})
+
+test('redactProxyAuthFromText redacts stream query credentials', () => {
+  assert.equal(
+    proxyAuth.redactProxyAuthFromText(
+      'https://proxy.example.test/rest/stream.view?id=1&u=demo&p=secret&t=token&s=salt&format=raw',
+    ),
+    'https://proxy.example.test/rest/stream.view?id=1&u=<redacted>&p=<redacted>&t=<redacted>&s=<redacted>&format=raw',
+  )
+})

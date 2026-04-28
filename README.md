@@ -3,18 +3,22 @@
 # Aonsoku BasicAuth
 
 Unofficial Aonsoku fork with reverse-proxy BasicAuth support for Traefik,
-Authentik, Pangolin, nginx, Caddy, and similar servers.
+Authentik, Pangolin, nginx, Caddy, and similar servers. Desktop song playback
+uses MPV by default to avoid Chromium/Web-audio failures with lossless and
+high-resolution streams.
 
 This fork preserves upstream Aonsoku's MIT license and attribution. The only
-intended fork-specific feature is desktop Electron support for a separate
-reverse-proxy BasicAuth username and password, stored through Electron
-`safeStorage` and injected only for the configured server origin.
+intended fork-specific surface is desktop Electron support for a separate
+reverse-proxy BasicAuth username and password plus MPV-first song playback.
+Proxy credentials are stored through Electron `safeStorage` and injected only
+for the configured server origin.
 
 ## Support Scope
 
-This repository only tracks this fork's reverse-proxy BasicAuth and proxy-auth
-behavior. General Aonsoku bugs, feature requests, server issues, and packaging
-requests outside this fork's published prereleases are out of scope here.
+This repository tracks this fork's reverse-proxy BasicAuth/proxy-auth behavior
+and its MPV desktop song engine. General Aonsoku bugs, feature requests, server
+issues, and packaging requests outside this fork's published prereleases are out
+of scope here.
 
 <br />
 <div align="center">
@@ -98,6 +102,7 @@ requests outside this fork's published prereleases are out of scope here.
 * Node.js
 * pnpm, npm or yarn
 * cargo
+* MPV installed or configured by path for desktop song playback
 
 ### Installation
 

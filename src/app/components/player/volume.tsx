@@ -14,11 +14,12 @@ import { Slider } from '@/app/components/ui/slider'
 import { usePlayerHotkeys } from '@/app/hooks/use-audio-hotkeys'
 import { cn } from '@/lib/utils'
 import { usePlayerVolume, useVolumeSettings } from '@/store/player.store'
+import { IPlaybackRef } from '@/types/playerContext'
 import { PopoverVolume } from './popover-volume'
 
 interface PlayerVolumeProps {
   disabled: boolean
-  audioRef: RefObject<HTMLAudioElement>
+  audioRef: RefObject<IPlaybackRef>
 }
 
 export function PlayerVolume({ disabled, audioRef }: PlayerVolumeProps) {

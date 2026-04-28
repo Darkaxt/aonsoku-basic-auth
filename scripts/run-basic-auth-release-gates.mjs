@@ -3,7 +3,14 @@ import { spawnSync } from 'node:child_process'
 const full = process.argv.includes('--full')
 
 const commands = [
-  ['node', ['--test', 'scripts/tests/proxy-auth.test.mjs']],
+  [
+    'node',
+    [
+      '--test',
+      'scripts/tests/proxy-auth.test.mjs',
+      'scripts/tests/audio-engine.test.mjs',
+    ],
+  ],
   ['corepack', ['pnpm', 'run', 'build']],
   ['corepack', ['pnpm', 'run', 'electron:build']],
   ['corepack', ['pnpm', 'run', 'lint']],

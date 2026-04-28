@@ -89,6 +89,20 @@ export const usePlayerStore = createWithEqualityFn<IPlayerContext>()(
             accumulated: 0,
           },
           settings: {
+            audioEngine: {
+              engine: 'mpv',
+              mpvBinaryPath: '',
+              setEngine: (value) => {
+                set((state) => {
+                  state.settings.audioEngine.engine = value
+                })
+              },
+              setMpvBinaryPath: (value) => {
+                set((state) => {
+                  state.settings.audioEngine.mpvBinaryPath = value
+                })
+              },
+            },
             privacy: {
               lrclib: {
                 enabled: true,
@@ -1190,6 +1204,9 @@ export const usePlayerVolume = () => ({
 
 export const useVolumeSettings = () =>
   usePlayerStore((state) => state.settings.volume)
+
+export const useAudioEngineSettings = () =>
+  usePlayerStore((state) => state.settings.audioEngine)
 
 export const useReplayGainState = () => {
   const { enabled, type, preAmp, error, defaultGain } = usePlayerStore(

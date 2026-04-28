@@ -9,11 +9,12 @@ import {
   usePlayerProgress,
   usePlayerSonglist,
 } from '@/store/player.store'
+import { IPlaybackRef } from '@/types/playerContext'
 import { convertSecondsToTime } from '@/utils/convertSecondsToTime'
 import { logger } from '@/utils/logger'
 
 interface PlayerProgressProps {
-  audioRef: RefObject<HTMLAudioElement>
+  audioRef: RefObject<IPlaybackRef>
 }
 
 let isSeeking = false

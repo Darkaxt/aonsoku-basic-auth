@@ -1,6 +1,7 @@
 import { EpisodeWithPodcast } from './responses/podcasts'
 import { Radio } from './responses/radios'
 import { ISong } from './responses/song'
+import { AudioEngine } from '../utils/audio-engine'
 
 export enum LoopState {
   Off = 0,
@@ -38,6 +39,11 @@ export interface IPlaybackContext {
   isSourceModified: boolean
 }
 
+export interface IPlaybackRef {
+  currentTime: number
+  volume: number
+}
+
 export interface IPlayerState {
   isPlaying: boolean
   loopState: LoopState
@@ -47,7 +53,7 @@ export interface IPlayerState {
   currentDuration: number
   mediaType: 'song' | 'radio' | 'podcast'
   currentPlaybackRate: number
-  audioPlayerRef: HTMLAudioElement | null
+  audioPlayerRef: IPlaybackRef | null
   mainDrawerState: boolean
   queueState: boolean
   lyricsState: boolean
@@ -94,6 +100,13 @@ interface IReplayGainActions {
 interface IReplayGain {
   values: IReplayGainData
   actions: IReplayGainActions
+}
+
+interface IAudioEngineSettings {
+  engine: AudioEngine
+  mpvBinaryPath: string
+  setEngine: (value: AudioEngine) => void
+  setMpvBinaryPath: (value: string) => void
 }
 
 interface IFullscreen {
@@ -145,6 +158,7 @@ interface IColorsSettings {
 }
 
 export interface IPlayerSettings {
+  audioEngine: IAudioEngineSettings
   volume: IVolumeSettings
   fullscreen: IFullscreen
   lyrics: ILyrics
@@ -188,7 +202,7 @@ export interface IPlayerActions {
   handleVolumeWheel: (isScrollingDown: boolean) => void
   setCurrentDuration: (duration: number) => void
   setPlayRadio: (list: Radio[], index: number) => void
-  setAudioPlayerRef: (ref: HTMLAudioElement) => void
+  setAudioPlayerRef: (ref: IPlaybackRef) => void
   setNextOnQueue: (songlist: ISong[]) => void
   setLastOnQueue: (songlist: ISong[]) => void
   removeSongFromQueue: (id: string) => void

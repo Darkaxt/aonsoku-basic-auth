@@ -154,6 +154,17 @@ export const createProxyAuthHeaderForRequest = (
   return createBasicAuthorizationHeader(config.username, config.password)
 }
 
+export const createMpvHttpHeaderFieldsForRequest = (
+  requestUrl: string,
+  config: ProxyAuthRequestConfig,
+): string[] => {
+  const header = createProxyAuthHeaderForRequest(requestUrl, {}, config)
+
+  if (!header) return []
+
+  return [`Authorization: ${header}`]
+}
+
 export const withUrlBasicAuth = (
   rawUrl: string,
   username: string,
@@ -175,4 +186,8 @@ export const redactProxyAuthFromText = (value: string): string => {
   return value
     .replace(/\bBasic\s+[A-Za-z0-9+/=]+/g, 'Basic <redacted>')
     .replace(/(https?:\/\/)([^:@/\s]+):([^@/\s]+)@/gi, '$1<proxy-auth>@')
+    .replace(
+      /([?&](?:u|p|t|s)=)([^&#\s]+)/gi,
+      (_match, prefix) => `${prefix}<redacted>`,
+    )
 }

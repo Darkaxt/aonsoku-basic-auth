@@ -1,4 +1,12 @@
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react'
+import {
+  RefObject,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { getSongStreamUrl } from '@/api/httpClient'
 import { getProxyURL } from '@/api/podcastClient'
 import { MiniPlayerButton } from '@/app/components/mini-player/button'
@@ -7,6 +15,7 @@ import { TrackInfo } from '@/app/components/player/track-info'
 import { podcasts } from '@/service/podcasts'
 import {
   getVolume,
+  useAudioEngineSettings,
   usePlayerActions,
   usePlayerIsPlaying,
   usePlayerLoop,
@@ -16,9 +25,11 @@ import {
   usePlayerStore,
   useReplayGainState,
 } from '@/store/player.store'
-import { LoopState } from '@/types/playerContext'
+import { IPlaybackRef, LoopState } from '@/types/playerContext'
 import { ensureSupportForAlac } from '@/utils/alac'
+import { resolveAudioEngine } from '@/utils/audio-engine'
 import { hasPiPSupport } from '@/utils/browser'
+import { isDesktop } from '@/utils/desktop'
 import { logger } from '@/utils/logger'
 import { ReplayGainParams } from '@/utils/replayGain'
 import { AudioPlayer } from './audio'
@@ -27,6 +38,7 @@ import { PlayerControls } from './controls'
 import { PlayerExpandButton } from './expand-button'
 import { PlayerLikeButton } from './like-button'
 import { PlayerLyricsButton } from './lyrics-button'
+import { MpvAudioPlayer } from './mpv-audio'
 import { PodcastInfo } from './podcast-info'
 import { PodcastPlaybackRate } from './podcast-playback-rate'
 import { PlayerProgress } from './progress'
@@ -51,6 +63,8 @@ export function Player() {
   const audioRef = useRef<HTMLAudioElement>(null)
   const radioRef = useRef<HTMLAudioElement>(null)
   const podcastRef = useRef<HTMLAudioElement>(null)
+  const mpvPlaybackRef = useRef<IPlaybackRef | null>(null)
+  const [mpvFallback, setMpvFallback] = useState(false)
   const {
     setAudioPlayerRef,
     setCurrentDuration,
@@ -66,6 +80,8 @@ export function Player() {
   const { isSong, isRadio, isPodcast } = usePlayerMediaType()
   const loopState = usePlayerLoop()
   const audioPlayerRef = usePlayerRef()
+  const { engine: configuredAudioEngine, mpvBinaryPath } =
+    useAudioEngineSettings()
   const currentPlaybackRate = usePlayerStore().playerState.currentPlaybackRate
   const { replayGainType, replayGainPreAmp, replayGainDefaultGain } =
     useReplayGainState()
@@ -73,21 +89,61 @@ export function Player() {
   const song = currentList[currentSongIndex]
   const radio = radioList[currentSongIndex]
   const podcast = podcastList[currentSongIndex]
+  const audioEngine = resolveAudioEngine({
+    configuredEngine: configuredAudioEngine,
+    isDesktop: isDesktop(),
+    mpvFallback,
+  })
+  const isMpvSong = isSong && audioEngine === 'mpv'
 
-  const getAudioRef = useCallback(() => {
+  if (!mpvPlaybackRef.current) {
+    mpvPlaybackRef.current = {
+      get currentTime() {
+        return usePlayerStore.getState().playerProgress.progress
+      },
+      set currentTime(value: number) {
+        window.api.mpvPlayer.seekTo(value)
+      },
+      get volume() {
+        return usePlayerStore.getState().playerState.volume / 100
+      },
+      set volume(value: number) {
+        window.api.mpvPlayer.volume(value * 100)
+      },
+    }
+  }
+
+  const getHtmlAudioRef = useCallback(() => {
     if (isRadio) return radioRef
     if (isPodcast) return podcastRef
 
     return audioRef
   }, [isPodcast, isRadio])
 
+  const getPlaybackRef = useCallback((): RefObject<IPlaybackRef> => {
+    if (isMpvSong) return mpvPlaybackRef as RefObject<IPlaybackRef>
+    if (isRadio) return radioRef as RefObject<IPlaybackRef>
+    if (isPodcast) return podcastRef as RefObject<IPlaybackRef>
+
+    return audioRef as RefObject<IPlaybackRef>
+  }, [isMpvSong, isPodcast, isRadio])
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: audioRef needed
   useEffect(() => {
     if (!isSong && !song) return
 
-    if (audioPlayerRef === null && audioRef.current)
-      setAudioPlayerRef(audioRef.current)
-  }, [audioPlayerRef, audioRef, isSong, setAudioPlayerRef, song])
+    const playbackRef = isMpvSong ? mpvPlaybackRef.current : audioRef.current
+
+    if (playbackRef && audioPlayerRef !== playbackRef) {
+      setAudioPlayerRef(playbackRef)
+    }
+  }, [audioPlayerRef, audioRef, isMpvSong, isSong, setAudioPlayerRef, song])
+
+  useEffect(() => {
+    if (!configuredAudioEngine && !mpvBinaryPath) return
+
+    setMpvFallback(false)
+  }, [configuredAudioEngine, mpvBinaryPath])
 
   useEffect(() => {
     const audio = podcastRef.current
@@ -97,7 +153,7 @@ export function Player() {
   }, [currentPlaybackRate, isPodcast])
 
   const setupDuration = useCallback(() => {
-    const audio = getAudioRef().current
+    const audio = getHtmlAudioRef().current
     if (!audio) return
 
     const audioDuration = Math.floor(audio.duration)
@@ -127,7 +183,7 @@ export function Player() {
       audio.currentTime = progress
     }
   }, [
-    getAudioRef,
+    getHtmlAudioRef,
     isPodcast,
     isSong,
     song,
@@ -139,19 +195,19 @@ export function Player() {
   ])
 
   const setupProgress = useCallback(() => {
-    const audio = getAudioRef().current
+    const audio = getHtmlAudioRef().current
     if (!audio) return
 
     const currentProgress = Math.floor(audio.currentTime)
     setProgress(currentProgress)
-  }, [getAudioRef, setProgress])
+  }, [getHtmlAudioRef, setProgress])
 
   const setupInitialVolume = useCallback(() => {
-    const audio = getAudioRef().current
+    const audio = getHtmlAudioRef().current
     if (!audio) return
 
     audio.volume = getVolume() / 100
-  }, [getAudioRef])
+  }, [getHtmlAudioRef])
 
   const sendFinishProgress = useCallback(() => {
     if (!isPodcast || !podcast) return
@@ -207,11 +263,11 @@ export function Player() {
             song={song}
             radio={radio}
             podcast={podcast}
-            audioRef={getAudioRef()}
+            audioRef={getPlaybackRef()}
           />
 
           {(isSong || isPodcast) && (
-            <MemoPlayerProgress audioRef={getAudioRef()} />
+            <MemoPlayerProgress audioRef={getPlaybackRef()} />
           )}
         </div>
         {/* Remain Controls and Volume */}
@@ -230,7 +286,7 @@ export function Player() {
             )}
 
             <MemoPlayerVolume
-              audioRef={getAudioRef()}
+              audioRef={getPlaybackRef()}
               disabled={!song && !radio && !podcast}
             />
 
@@ -240,7 +296,15 @@ export function Player() {
         </div>
       </div>
 
-      {isSong && song && (
+      {isSong && song && isMpvSong && (
+        <MpvAudioPlayer
+          binaryPath={mpvBinaryPath}
+          onFallback={setMpvFallback}
+          song={song}
+        />
+      )}
+
+      {isSong && song && !isMpvSong && (
         <AudioPlayer
           replayGain={trackReplayGain}
           src={getSongStreamUrl(

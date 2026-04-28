@@ -29,7 +29,7 @@ import {
   usePlayerPrevAndNext,
   usePlayerShuffle,
 } from '@/store/player.store'
-import { LoopState } from '@/types/playerContext'
+import { IPlaybackRef, LoopState } from '@/types/playerContext'
 import { EpisodeWithPodcast } from '@/types/responses/podcasts'
 import { Radio } from '@/types/responses/radios'
 import { ISong } from '@/types/responses/song'
@@ -39,7 +39,7 @@ interface PlayerControlsProps {
   song: ISong
   radio: Radio
   podcast: EpisodeWithPodcast
-  audioRef: RefObject<HTMLAudioElement>
+  audioRef: RefObject<IPlaybackRef>
 }
 
 export function PlayerControls({

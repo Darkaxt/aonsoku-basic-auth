@@ -21,7 +21,11 @@ import {
   SelectValue,
 } from '@/app/components/ui/select'
 import { Switch } from '@/app/components/ui/switch'
-import { useReplayGainActions, useReplayGainState } from '@/store/player.store'
+import {
+  useAudioEngineSettings,
+  useReplayGainActions,
+  useReplayGainState,
+} from '@/store/player.store'
 import { ReplayGainType } from '@/types/playerContext'
 
 const replayGainModes: ReplayGainType[] = ['track', 'album']
@@ -35,6 +39,7 @@ export function ReplayGainConfig() {
     replayGainDefaultGain,
     replayGainError,
   } = useReplayGainState()
+  const { engine } = useAudioEngineSettings()
   const {
     setReplayGainEnabled,
     setReplayGainType,
@@ -87,6 +92,14 @@ export function ReplayGainConfig() {
                 {t('settings.audio.replayGain.error.button')}
               </Button>
             </ContentItemForm>
+          </ContentItem>
+        )}
+
+        {engine === 'mpv' && (
+          <ContentItem>
+            <ContentItemTitle className="text-xs text-muted-foreground text-balance">
+              {t('settings.audio.replayGain.mpvIgnored')}
+            </ContentItemTitle>
           </ContentItem>
         )}
 

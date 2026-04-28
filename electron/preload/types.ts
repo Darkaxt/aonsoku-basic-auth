@@ -30,6 +30,26 @@ export enum IpcChannels {
   SetProxyAuthSecret = 'set-proxy-auth-secret',
   RemoveProxyAuthSecret = 'remove-proxy-auth-secret',
   SyncProxyAuth = 'sync-proxy-auth',
+  MpvPlayerInitialize = 'mpv-player-initialize',
+  MpvPlayerRestart = 'mpv-player-restart',
+  MpvPlayerIsRunning = 'mpv-player-is-running',
+  MpvPlayerCleanup = 'mpv-player-cleanup',
+  MpvPlayerSetProperties = 'mpv-player-set-properties',
+  MpvPlayerQuit = 'mpv-player-quit',
+  MpvPlayerPlay = 'mpv-player-play',
+  MpvPlayerPause = 'mpv-player-pause',
+  MpvPlayerStop = 'mpv-player-stop',
+  MpvPlayerSeek = 'mpv-player-seek',
+  MpvPlayerSeekTo = 'mpv-player-seek-to',
+  MpvPlayerVolume = 'mpv-player-volume',
+  MpvPlayerMute = 'mpv-player-mute',
+  MpvPlayerGetCurrentTime = 'mpv-player-get-current-time',
+  MpvPlayerSetQueue = 'mpv-player-set-queue',
+  MpvPlayerSetQueueNext = 'mpv-player-set-queue-next',
+  MpvPlayerAutoNext = 'mpv-player-auto-next',
+  MpvPlayerCurrentTime = 'mpv-player-current-time',
+  MpvPlayerFallback = 'mpv-player-fallback',
+  MpvPlayerError = 'mpv-player-error',
   CheckForUpdates = 'check-for-updates',
   DownloadUpdate = 'download-update',
   QuitAndInstall = 'quit-and-install',
@@ -66,6 +86,41 @@ export interface ProxyAuthSyncPayload {
   username: string
 }
 
+export type MpvInitializePayload = {
+  binaryPath?: string
+  properties?: Record<string, unknown>
+}
+
+export interface IMpvPlayerAPI {
+  initialize: (payload?: MpvInitializePayload) => Promise<boolean>
+  restart: (payload?: MpvInitializePayload) => Promise<boolean>
+  isRunning: () => Promise<boolean>
+  cleanup: () => void
+  setProperties: (payload: Record<string, unknown>) => void
+  quit: () => void
+  play: () => void
+  pause: () => void
+  stop: () => void
+  seek: (seconds: number) => void
+  seekTo: (seconds: number) => void
+  volume: (value: number) => void
+  mute: (muted: boolean) => void
+  getCurrentTime: () => Promise<number | undefined>
+  setQueue: (current?: string, next?: string, pause?: boolean) => void
+  setQueueNext: (url?: string) => void
+  autoNext: (url?: string) => void
+}
+
+export interface IMpvPlayerListenerAPI {
+  onAutoNext: (callback: () => void) => () => void
+  onCurrentTime: (callback: (time: number) => void) => () => void
+  onPlay: (callback: () => void) => () => void
+  onPause: (callback: () => void) => () => void
+  onStop: (callback: () => void) => () => void
+  onFallback: (callback: (enabled: boolean) => void) => () => void
+  onError: (callback: (message: string) => void) => () => void
+}
+
 export interface IAonsokuAPI {
   enterFullScreen: () => void
   exitFullScreen: () => void
@@ -93,6 +148,8 @@ export interface IAonsokuAPI {
   setProxyAuthSecret: (password: string) => Promise<boolean>
   removeProxyAuthSecret: () => void
   syncProxyAuth: (payload: ProxyAuthSyncPayload) => Promise<void>
+  mpvPlayer: IMpvPlayerAPI
+  mpvPlayerListener: IMpvPlayerListenerAPI
   checkForUpdates: () => Promise<UpdateCheckResult | null>
   downloadUpdate: () => void
   quitAndInstall: () => void

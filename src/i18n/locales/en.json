@@ -596,7 +596,8 @@
   },
   "warnings": {
     "reload": "There is a song playing!\nAre you sure you want to reload the page?",
-    "songError": "Unable to play the song, check the Server!"
+    "songError": "Unable to play the song, check the Server!",
+    "mpvFallback": "MPV could not play this song. Falling back to the Web audio engine for this session."
   },
   "update": {
     "dialog": {
@@ -659,10 +660,26 @@
       }
     },
     "audio": {
+      "engine": {
+        "group": "Playback Engine",
+        "description": "Desktop song playback uses MPV by default for better lossless and high-resolution format support.",
+        "mode": {
+          "label": "Song engine",
+          "info": "MPV is used for desktop song playback. Web remains available as a fallback and for web builds.",
+          "mpv": "MPV",
+          "web": "Web"
+        },
+        "mpvPath": {
+          "label": "MPV binary path",
+          "info": "Leave blank to use mpv from PATH. Set this if mpv is installed elsewhere.",
+          "placeholder": "mpv or C:\\\\path\\\\to\\\\mpv.exe"
+        }
+      },
       "replayGain": {
         "group": "ReplayGain",
         "description": "Automatically normalize audio playback levels for a consistent listening experience.",
         "enabled": "Enabled",
+        "mpvIgnored": "ReplayGain is currently Web-engine only and is ignored while MPV is selected.",
         "error": {
           "message": "There was an error playing the track using Replay Gain.",
           "button": "Try again"

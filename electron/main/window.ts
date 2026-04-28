@@ -6,6 +6,7 @@ import { colorsState } from './core/colors'
 import { setupDownloads } from './core/downloads'
 import { setupEvents, setupIpcEvents } from './core/events'
 import { appIcon } from './core/icon'
+import { setupMpvPlayerIpc } from './core/mpvPlayer'
 import {
   installProxyAuthInterceptor,
   setupProxyAuthIpc,
@@ -47,6 +48,7 @@ export function createWindow(): void {
   createTray()
   installProxyAuthInterceptor(mainWindow.webContents.session)
   setupProxyAuthIpc()
+  setupMpvPlayerIpc(mainWindow)
   setupEvents(mainWindow)
   setupIpcEvents(mainWindow)
   setupDownloads(mainWindow)

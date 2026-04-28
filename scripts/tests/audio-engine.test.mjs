@@ -32,3 +32,29 @@ test('resolveAudioEngine falls back to web when MPV failed in the current sessio
     'web',
   )
 })
+
+test('shouldShowMpvBinaryPath only shows the MPV path for desktop MPV playback', () => {
+  assert.equal(
+    audioEngine.shouldShowMpvBinaryPath({
+      isDesktop: true,
+      selectedEngine: 'mpv',
+    }),
+    true,
+  )
+
+  assert.equal(
+    audioEngine.shouldShowMpvBinaryPath({
+      isDesktop: true,
+      selectedEngine: 'web',
+    }),
+    false,
+  )
+
+  assert.equal(
+    audioEngine.shouldShowMpvBinaryPath({
+      isDesktop: false,
+      selectedEngine: 'mpv',
+    }),
+    false,
+  )
+})

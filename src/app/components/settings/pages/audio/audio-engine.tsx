@@ -20,8 +20,9 @@ import {
   SelectValue,
 } from '@/app/components/ui/select'
 import { useAudioEngineSettings } from '@/store/player.store'
-import { AudioEngine } from '@/utils/audio-engine'
+import { AudioEngine, shouldShowMpvBinaryPath } from '@/utils/audio-engine'
 import { isDesktop } from '@/utils/desktop'
+import { normalizeMpvBinaryPath } from '@/utils/mpv'
 
 const audioEngines: AudioEngine[] = ['mpv', 'web']
 
@@ -31,6 +32,10 @@ export function AudioEngineConfig() {
   const { engine, mpvBinaryPath, setEngine, setMpvBinaryPath } =
     useAudioEngineSettings()
   const selectedEngine = desktop ? engine : 'web'
+  const showMpvPath = shouldShowMpvBinaryPath({
+    isDesktop: desktop,
+    selectedEngine,
+  })
 
   return (
     <Root>
@@ -72,19 +77,25 @@ export function AudioEngineConfig() {
           </ContentItemForm>
         </ContentItem>
 
-        <ContentItem>
-          <ContentItemTitle info={t('settings.audio.engine.mpvPath.info')}>
-            {t('settings.audio.engine.mpvPath.label')}
-          </ContentItemTitle>
-          <ContentItemForm className="max-w-72">
-            <Input
-              value={mpvBinaryPath}
-              onChange={(event) => setMpvBinaryPath(event.target.value)}
-              placeholder={t('settings.audio.engine.mpvPath.placeholder')}
-              disabled={!desktop || selectedEngine !== 'mpv'}
-            />
-          </ContentItemForm>
-        </ContentItem>
+        {showMpvPath && (
+          <ContentItem data-testid="settings-audio-engine-mpv-path">
+            <ContentItemTitle info={t('settings.audio.engine.mpvPath.info')}>
+              {t('settings.audio.engine.mpvPath.label')}
+            </ContentItemTitle>
+            <ContentItemForm className="max-w-72">
+              <Input
+                value={mpvBinaryPath}
+                onChange={(event) => setMpvBinaryPath(event.target.value)}
+                onBlur={(event) =>
+                  setMpvBinaryPath(
+                    normalizeMpvBinaryPath(event.target.value) ?? '',
+                  )
+                }
+                placeholder={t('settings.audio.engine.mpvPath.placeholder')}
+              />
+            </ContentItemForm>
+          </ContentItem>
+        )}
       </Content>
 
       <ContentSeparator />

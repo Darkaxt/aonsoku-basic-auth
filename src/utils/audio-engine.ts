@@ -15,3 +15,11 @@ export const resolveAudioEngine = ({
 
   return configuredEngine ?? 'mpv'
 }
+
+export const shouldShowMpvBinaryPath = ({
+  isDesktop,
+  selectedEngine,
+}: {
+  isDesktop: boolean
+  selectedEngine: AudioEngine
+}): boolean => isDesktop && selectedEngine === 'mpv'

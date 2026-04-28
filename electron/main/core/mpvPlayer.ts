@@ -1,9 +1,15 @@
 import { BrowserWindow, app, ipcMain } from 'electron'
-import { rm } from 'node:fs/promises'
+import { appendFile, mkdir, rm } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 import { pid } from 'node:process'
 import MpvAPI from 'node-mpv'
 import { IpcChannels, MpvInitializePayload } from '../../preload/types'
-import { redactProxyAuthFromText } from '../../../src/utils/proxy-auth'
+import {
+  describeMpvLoadForLog,
+  normalizeMpvBinaryPath,
+  redactMpvLogValue,
+  shouldFallbackForMpvFailure,
+} from '../../../src/utils/mpv'
 import { getMpvProxyAuthHeaderFields } from './proxy-auth'
 
 type NodeMpvError = {
@@ -34,25 +40,57 @@ function sendToRenderer(channel: IpcChannels, ...args: unknown[]) {
   rendererWindow.webContents.send(channel, ...args)
 }
 
-function safeText(value: unknown): string {
-  if (typeof value === 'string') return redactProxyAuthFromText(value)
+function getMpvLogPath(): string {
+  const logDirectory = app.getPath('logs') || join(app.getPath('userData'), 'logs')
+
+  return join(logDirectory, 'mpv.log')
+}
+
+async function writeMpvLog(
+  level: 'error' | 'info' | 'warn',
+  message: string,
+  details?: unknown,
+) {
+  const detailsText = details === undefined ? '' : ` ${redactMpvLogValue(details)}`
+  const line = `${new Date().toISOString()} [${level}] ${message}${detailsText}\n`
+
+  if (level === 'error') {
+    console.error(`[mpv] ${message}${detailsText}`)
+  } else if (level === 'warn') {
+    console.warn(`[mpv] ${message}${detailsText}`)
+  } else {
+    console.info(`[mpv] ${message}${detailsText}`)
+  }
 
   try {
-    return redactProxyAuthFromText(JSON.stringify(value))
-  } catch {
-    return 'Unknown MPV error'
+    const logPath = getMpvLogPath()
+    await mkdir(dirname(logPath), { recursive: true })
+    await appendFile(logPath, line, 'utf8')
+  } catch (error) {
+    console.warn('[mpv] Failed to write MPV log', redactMpvLogValue(error))
   }
 }
 
+function logMpv(
+  level: 'error' | 'info' | 'warn',
+  message: string,
+  details?: unknown,
+) {
+  writeMpvLog(level, message, details).catch((error) => {
+    console.warn('[mpv] Failed to queue MPV log write', redactMpvLogValue(error))
+  })
+}
+
 function reportMpvError(action: string, error?: unknown) {
-  const suffix = error ? `: ${safeText(error as NodeMpvError)}` : ''
+  const suffix = error ? `: ${redactMpvLogValue(error as NodeMpvError)}` : ''
   const message = `MPV ${action} failed${suffix}`
 
-  console.error(`[mpv] ${message}`)
+  logMpv('error', message)
   sendToRenderer(IpcChannels.MpvPlayerError, message)
 }
 
 function setFallback(isFallback: boolean) {
+  logMpv('warn', 'MPV fallback state changed', { enabled: isFallback })
   sendToRenderer(IpcChannels.MpvPlayerFallback, isFallback)
 }
 
@@ -79,8 +117,63 @@ async function quit(instance = getMpvInstance()) {
   }
 }
 
+function headersFromMpvHeaderFields(headerFields: string[]) {
+  const headers: Record<string, string> = {
+    Range: 'bytes=0-0',
+  }
+
+  headerFields.forEach((field) => {
+    const separatorIndex = field.indexOf(':')
+
+    if (separatorIndex <= 0) return
+
+    const name = field.slice(0, separatorIndex).trim()
+    const value = field.slice(separatorIndex + 1).trim()
+
+    if (name && value) {
+      headers[name] = value
+    }
+  })
+
+  return headers
+}
+
+async function runMpvLoadDiagnostic(url: string, headerFields: string[]) {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 7000)
+  const loadDetails = describeMpvLoadForLog(url, headerFields)
+
+  try {
+    const response = await fetch(url, {
+      headers: headersFromMpvHeaderFields(headerFields),
+      signal: controller.signal,
+    })
+
+    logMpv('warn', 'MPV load diagnostic completed', {
+      ...loadDetails,
+      status: response.status,
+      statusText: response.statusText,
+    })
+
+    await response.body?.cancel().catch(() => undefined)
+  } catch (error) {
+    logMpv('warn', 'MPV load diagnostic failed', {
+      ...loadDetails,
+      error: redactMpvLogValue(error),
+    })
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
 async function createMpv(payload: MpvInitializePayload = {}) {
-  const binaryPath = payload.binaryPath?.trim() || undefined
+  const binaryPath = normalizeMpvBinaryPath(payload.binaryPath)
+
+  logMpv('info', 'Starting MPV', {
+    binaryPath: binaryPath ?? 'mpv from PATH',
+    socketPath,
+  })
+
   const mpv = new MpvAPI(
     {
       audio_only: true,
@@ -93,6 +186,7 @@ async function createMpv(payload: MpvInitializePayload = {}) {
   )
 
   await mpv.start()
+  logMpv('info', 'MPV started', { socketPath })
 
   if (payload.properties) {
     await mpv.setMultipleProperties(payload.properties)
@@ -127,23 +221,77 @@ async function createMpv(payload: MpvInitializePayload = {}) {
     sendToRenderer(IpcChannels.MpvPlayerCurrentTime, time)
   })
 
+  mpv.on('crashed', () => {
+    logMpv('error', 'MPV process crashed')
+
+    if (mpvInstance === mpv) {
+      mpvInstance = null
+    }
+
+    if (shouldFallbackForMpvFailure('process-crash')) {
+      setFallback(true)
+    }
+
+    sendToRenderer(
+      IpcChannels.MpvPlayerError,
+      'MPV process crashed. Falling back to Web playback for this session.',
+    )
+  })
+
+  mpv.on('quit', () => {
+    logMpv('warn', 'MPV process exited')
+
+    if (mpvInstance === mpv) {
+      mpvInstance = null
+    }
+
+    if (shouldFallbackForMpvFailure('process-exit')) {
+      setFallback(true)
+    }
+
+    sendToRenderer(
+      IpcChannels.MpvPlayerError,
+      'MPV process exited. Falling back to Web playback for this session.',
+    )
+  })
+
   return mpv
-}
-
-function loadOptionsForUrl(url: string): string[] | undefined {
-  const headerFields = getMpvProxyAuthHeaderFields(url)
-
-  if (headerFields.length === 0) return undefined
-
-  return [`http-header-fields=${headerFields.join(',')}`]
 }
 
 async function loadUrl(url: string, mode: 'append' | 'replace') {
   const mpv = getMpvInstance()
+  const headerFields = getMpvProxyAuthHeaderFields(url)
+  const loadDetails = describeMpvLoadForLog(url, headerFields)
 
   if (!mpv) throw new Error('MPV is not initialized')
 
-  await mpv.load(url, mode, loadOptionsForUrl(url))
+  logMpv('info', 'Loading MPV URL', {
+    ...loadDetails,
+    mode,
+  })
+
+  try {
+    await mpv.load(
+      url,
+      mode,
+      headerFields.length
+        ? [`http-header-fields=${headerFields.join(',')}`]
+        : undefined,
+    )
+    logMpv('info', 'MPV URL loaded', { ...loadDetails, mode })
+  } catch (error) {
+    logMpv('warn', 'MPV URL load rejected', {
+      ...loadDetails,
+      error: redactMpvLogValue(error),
+      mode,
+    })
+    runMpvLoadDiagnostic(url, headerFields).catch((diagnosticError) => {
+      logMpv('warn', 'MPV load diagnostic failed unexpectedly', {
+        error: redactMpvLogValue(diagnosticError),
+      })
+    })
+    throw error
+  }
 }
 
 async function initialize(payload: MpvInitializePayload = {}) {
@@ -200,7 +348,9 @@ export function setupMpvPlayerIpc(window: BrowserWindow | null) {
       return true
     } catch (error) {
       reportMpvError('initialize', error)
-      setFallback(true)
+      if (shouldFallbackForMpvFailure('initialize')) {
+        setFallback(true)
+      }
       return false
     }
   })
@@ -211,7 +361,9 @@ export function setupMpvPlayerIpc(window: BrowserWindow | null) {
       return true
     } catch (error) {
       reportMpvError('restart', error)
-      setFallback(true)
+      if (shouldFallbackForMpvFailure('restart')) {
+        setFallback(true)
+      }
       return false
     }
   })
@@ -301,11 +453,20 @@ export function setupMpvPlayerIpc(window: BrowserWindow | null) {
         }
 
         if (current) {
-          await loadUrl(current, 'replace')
+          await loadUrl(current, 'replace').catch(async (error) => {
+            reportMpvError('load current song', error)
+            await getMpvInstance()
+              ?.play()
+              .catch((playError) =>
+                reportMpvError('play after rejected current load', playError),
+              )
+          })
         }
 
         if (next) {
-          await loadUrl(next, 'append')
+          await loadUrl(next, 'append').catch((error) => {
+            reportMpvError('load next song', error)
+          })
         }
 
         if (pause) {
@@ -315,7 +476,6 @@ export function setupMpvPlayerIpc(window: BrowserWindow | null) {
         }
       } catch (error) {
         reportMpvError('set queue', error)
-        setFallback(true)
       }
     },
   )
@@ -329,7 +489,9 @@ export function setupMpvPlayerIpc(window: BrowserWindow | null) {
       }
 
       if (url) {
-        await loadUrl(url, 'append')
+        await loadUrl(url, 'append').catch((error) => {
+          reportMpvError('set next queue item load', error)
+        })
       }
     } catch (error) {
       reportMpvError('set next queue item', error)
@@ -341,7 +503,9 @@ export function setupMpvPlayerIpc(window: BrowserWindow | null) {
       await getMpvInstance()?.playlistRemove(0).catch(() => undefined)
 
       if (url) {
-        await loadUrl(url, 'append')
+        await loadUrl(url, 'append').catch((error) => {
+          reportMpvError('auto next load', error)
+        })
       }
     } catch (error) {
       reportMpvError('auto next', error)

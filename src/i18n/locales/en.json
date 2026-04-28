@@ -672,7 +672,7 @@
         "mpvPath": {
           "label": "MPV binary path",
           "info": "Leave blank to use mpv from PATH. Set this if mpv is installed elsewhere.",
-          "placeholder": "mpv or C:\\\\path\\\\to\\\\mpv.exe"
+          "placeholder": "mpv or C:\\path\\to\\mpv.exe"
         }
       },
       "replayGain": {

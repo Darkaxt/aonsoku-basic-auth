@@ -12,8 +12,9 @@ client unusable for lossless libraries.
   `development` for `0.14.0-ba.2`.
 - High-resolution/lossless song playback stability - this fork defaults
   desktop song playback to MPV, while keeping Web audio for web builds, radio,
-  podcasts, and fallback. `0.14.0-ba.5` makes MPV load handling more tolerant
-  and adds sanitized MPV diagnostics for playback failures.
+  podcasts, and fallback. `0.14.0-ba.6` makes MPV startup/load ordering more
+  deterministic, hides the custom MPV path when MPV is already on PATH, and
+  maps ReplayGain settings to MPV's native ReplayGain options.
 
 ## Reviewed but not claimed fixed
 

@@ -17,9 +17,11 @@ export const resolveAudioEngine = ({
 }
 
 export const shouldShowMpvBinaryPath = ({
+  isMpvOnPath,
   isDesktop,
   selectedEngine,
 }: {
+  isMpvOnPath: boolean
   isDesktop: boolean
   selectedEngine: AudioEngine
-}): boolean => isDesktop && selectedEngine === 'mpv'
+}): boolean => isDesktop && selectedEngine === 'mpv' && !isMpvOnPath

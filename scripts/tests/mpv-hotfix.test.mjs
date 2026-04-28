@@ -36,6 +36,29 @@ test('shouldFallbackForMpvFailure falls back for MPV availability and process fa
   assert.equal(mpv.shouldFallbackForMpvFailure('process-crash'), true)
 })
 
+test('resolveMpvInstanceForCommand returns the active instance immediately', async () => {
+  const activeInstance = { id: 'active' }
+  const pendingInstance = Promise.resolve({ id: 'pending' })
+
+  assert.equal(
+    await mpv.resolveMpvInstanceForCommand(activeInstance, pendingInstance),
+    activeInstance,
+  )
+})
+
+test('resolveMpvInstanceForCommand waits for pending startup before queue commands', async () => {
+  const pendingInstance = Promise.resolve({ id: 'pending' })
+
+  assert.deepEqual(
+    await mpv.resolveMpvInstanceForCommand(null, pendingInstance),
+    { id: 'pending' },
+  )
+})
+
+test('resolveMpvInstanceForCommand returns null when MPV has not started', async () => {
+  assert.equal(await mpv.resolveMpvInstanceForCommand(null, null), null)
+})
+
 test('describeMpvLoadForLog redacts URL credentials and auth headers', () => {
   const rawUrl = [
     'https://',
@@ -71,4 +94,47 @@ test('describeMpvLoadForLog records absent proxy authorization without secrets',
     proxyAuthorization: 'absent',
     url: 'https://example.test/rest/stream.view?<redacted-query>',
   })
+})
+
+test('createMpvReplayGainProperties disables native ReplayGain when disabled', () => {
+  assert.deepEqual(
+    mpv.createMpvReplayGainProperties({
+      defaultGain: -6,
+      enabled: false,
+      preAmp: 2,
+      type: 'album',
+    }),
+    {
+      replaygain: 'no',
+    },
+  )
+})
+
+test('createMpvReplayGainProperties maps track ReplayGain settings to MPV properties', () => {
+  assert.deepEqual(
+    mpv.createMpvReplayGainProperties({
+      defaultGain: -5,
+      enabled: true,
+      preAmp: 1.5,
+      type: 'track',
+    }),
+    {
+      replaygain: 'track',
+      'replaygain-clip': 'yes',
+      'replaygain-fallback': -5,
+      'replaygain-preamp': 1.5,
+    },
+  )
+})
+
+test('createMpvReplayGainProperties maps album ReplayGain settings to MPV properties', () => {
+  assert.equal(
+    mpv.createMpvReplayGainProperties({
+      defaultGain: -7,
+      enabled: true,
+      preAmp: 0,
+      type: 'album',
+    }).replaygain,
+    'album',
+  )
 })

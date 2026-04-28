@@ -1,6 +1,6 @@
 import { BrowserWindow, app, ipcMain } from 'electron'
-import { appendFile, mkdir, rm } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import { access, appendFile, mkdir, rm } from 'node:fs/promises'
+import { delimiter, dirname, join } from 'node:path'
 import { pid } from 'node:process'
 import MpvAPI from 'node-mpv'
 import { IpcChannels, MpvInitializePayload } from '../../preload/types'
@@ -8,6 +8,7 @@ import {
   describeMpvLoadForLog,
   normalizeMpvBinaryPath,
   redactMpvLogValue,
+  resolveMpvInstanceForCommand,
   shouldFallbackForMpvFailure,
 } from '../../../src/utils/mpv'
 import { getMpvProxyAuthHeaderFields } from './proxy-auth'
@@ -19,7 +20,13 @@ type NodeMpvError = {
   verbose?: string
 }
 
+type MpvCommandApi = MpvAPI & {
+  command: (command: string, args?: unknown[]) => Promise<unknown>
+  setProperty: (property: string, value: unknown) => Promise<unknown>
+}
+
 let mpvInstance: MpvAPI | null = null
+let mpvStartupPromise: Promise<MpvAPI> | null = null
 let rendererWindow: BrowserWindow | null = null
 
 const isWindows = process.platform === 'win32'
@@ -33,6 +40,10 @@ const defaultMpvParameters = [
   '--load-scripts=no',
   '--prefetch-playlist=yes',
 ]
+
+const mpvBinaryNames = isWindows
+  ? ['mpv.com', 'mpv.exe', 'mpv.cmd', 'mpv.bat']
+  : ['mpv']
 
 function sendToRenderer(channel: IpcChannels, ...args: unknown[]) {
   if (!rendererWindow || rendererWindow.isDestroyed()) return
@@ -96,6 +107,28 @@ function setFallback(isFallback: boolean) {
 
 function getMpvInstance() {
   return mpvInstance
+}
+
+async function findMpvOnPath(): Promise<string | undefined> {
+  const pathEntries = (process.env.PATH ?? '')
+    .split(delimiter)
+    .map((entry) => normalizeMpvBinaryPath(entry))
+    .filter((entry): entry is string => Boolean(entry))
+
+  for (const pathEntry of pathEntries) {
+    for (const binaryName of mpvBinaryNames) {
+      const candidate = join(pathEntry, binaryName)
+
+      try {
+        await access(candidate)
+        return candidate
+      } catch {
+        // Continue scanning PATH entries.
+      }
+    }
+  }
+
+  return undefined
 }
 
 async function quit(instance = getMpvInstance()) {
@@ -259,11 +292,16 @@ async function createMpv(payload: MpvInitializePayload = {}) {
 }
 
 async function loadUrl(url: string, mode: 'append' | 'replace') {
-  const mpv = getMpvInstance()
+  const mpv = await resolveMpvInstanceForCommand(
+    getMpvInstance(),
+    mpvStartupPromise,
+  )
   const headerFields = getMpvProxyAuthHeaderFields(url)
   const loadDetails = describeMpvLoadForLog(url, headerFields)
 
   if (!mpv) throw new Error('MPV is not initialized')
+
+  const mpvCommandApi = mpv as MpvCommandApi
 
   logMpv('info', 'Loading MPV URL', {
     ...loadDetails,
@@ -271,16 +309,11 @@ async function loadUrl(url: string, mode: 'append' | 'replace') {
   })
 
   try {
-    await mpv.load(
-      url,
-      mode,
-      headerFields.length
-        ? [`http-header-fields=${headerFields.join(',')}`]
-        : undefined,
-    )
-    logMpv('info', 'MPV URL loaded', { ...loadDetails, mode })
+    await mpvCommandApi.setProperty('http-header-fields', headerFields)
+    await mpvCommandApi.command('loadfile', [url, mode])
+    logMpv('info', 'MPV load command accepted', { ...loadDetails, mode })
   } catch (error) {
-    logMpv('warn', 'MPV URL load rejected', {
+    logMpv('warn', 'MPV load command rejected', {
       ...loadDetails,
       error: redactMpvLogValue(error),
       mode,
@@ -294,22 +327,36 @@ async function loadUrl(url: string, mode: 'append' | 'replace') {
   }
 }
 
-async function initialize(payload: MpvInitializePayload = {}) {
-  if (mpvInstance?.isRunning()) return
+async function startMpv(payload: MpvInitializePayload = {}) {
+  if (mpvInstance?.isRunning()) return mpvInstance
+  if (mpvStartupPromise) return mpvStartupPromise
 
-  mpvInstance = await createMpv(payload)
+  const startup = createMpv(payload).finally(() => {
+    if (mpvStartupPromise === startup) {
+      mpvStartupPromise = null
+    }
+  })
+
+  mpvStartupPromise = startup
+  mpvInstance = await startup
   setFallback(false)
+
+  return mpvInstance
+}
+
+async function initialize(payload: MpvInitializePayload = {}) {
+  await startMpv(payload)
 }
 
 async function restart(payload: MpvInitializePayload = {}) {
   const previous = mpvInstance
   mpvInstance = null
+  mpvStartupPromise = null
 
   await previous?.stop().catch(() => undefined)
   await quit(previous)
 
-  mpvInstance = await createMpv(payload)
-  setFallback(false)
+  await startMpv(payload)
 }
 
 function resetMpvIpc() {
@@ -334,6 +381,7 @@ function resetMpvIpc() {
   ipcMain.removeHandler(IpcChannels.MpvPlayerInitialize)
   ipcMain.removeHandler(IpcChannels.MpvPlayerRestart)
   ipcMain.removeHandler(IpcChannels.MpvPlayerIsRunning)
+  ipcMain.removeHandler(IpcChannels.MpvPlayerIsOnPath)
   ipcMain.removeHandler(IpcChannels.MpvPlayerGetCurrentTime)
 }
 
@@ -370,6 +418,17 @@ export function setupMpvPlayerIpc(window: BrowserWindow | null) {
 
   ipcMain.handle(IpcChannels.MpvPlayerIsRunning, () => {
     return Boolean(getMpvInstance()?.isRunning())
+  })
+
+  ipcMain.handle(IpcChannels.MpvPlayerIsOnPath, async () => {
+    const binaryPath = await findMpvOnPath()
+
+    logMpv('info', 'MPV PATH check completed', {
+      found: Boolean(binaryPath),
+      binaryPath: binaryPath ?? 'not found',
+    })
+
+    return Boolean(binaryPath)
   })
 
   ipcMain.handle(IpcChannels.MpvPlayerGetCurrentTime, async () => {

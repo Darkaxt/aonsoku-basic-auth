@@ -1,7 +1,7 @@
 {
   "name": "aonsoku-basic-auth",
   "private": true,
-  "version": "0.14.0-ba.5",
+  "version": "0.14.0-ba.6",
   "description": "Unofficial Aonsoku fork with reverse-proxy BasicAuth support.",
   "author": {
     "name": "Victor Alves"

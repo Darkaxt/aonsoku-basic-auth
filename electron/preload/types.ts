@@ -33,6 +33,7 @@ export enum IpcChannels {
   MpvPlayerInitialize = 'mpv-player-initialize',
   MpvPlayerRestart = 'mpv-player-restart',
   MpvPlayerIsRunning = 'mpv-player-is-running',
+  MpvPlayerIsOnPath = 'mpv-player-is-on-path',
   MpvPlayerCleanup = 'mpv-player-cleanup',
   MpvPlayerSetProperties = 'mpv-player-set-properties',
   MpvPlayerQuit = 'mpv-player-quit',
@@ -95,6 +96,7 @@ export interface IMpvPlayerAPI {
   initialize: (payload?: MpvInitializePayload) => Promise<boolean>
   restart: (payload?: MpvInitializePayload) => Promise<boolean>
   isRunning: () => Promise<boolean>
+  isOnPath: () => Promise<boolean>
   cleanup: () => void
   setProperties: (payload: Record<string, unknown>) => void
   quit: () => void

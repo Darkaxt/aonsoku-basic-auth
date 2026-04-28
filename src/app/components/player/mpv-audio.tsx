@@ -9,10 +9,12 @@ import {
   usePlayerSonglist,
   usePlayerStore,
   usePlayerVolume,
+  useReplayGainState,
 } from '@/store/player.store'
 import { LoopState } from '@/types/playerContext'
 import { ISong } from '@/types/responses/song'
 import { logger } from '@/utils/logger'
+import { createMpvReplayGainProperties } from '@/utils/mpv'
 
 type MpvAudioPlayerProps = {
   binaryPath?: string
@@ -65,15 +67,42 @@ export function MpvAudioPlayer({
     setProgress,
   } = usePlayerActions()
   const { volume } = usePlayerVolume()
+  const {
+    replayGainDefaultGain,
+    replayGainEnabled,
+    replayGainPreAmp,
+    replayGainType,
+  } = useReplayGainState()
   const skipQueueReplaceRef = useRef(false)
   const isPlayingRef = useRef(isPlaying)
   const nextUrlRef = useRef<string | undefined>(undefined)
+  const replayGainProperties = useMemo(
+    () =>
+      createMpvReplayGainProperties({
+        defaultGain: replayGainDefaultGain,
+        enabled: replayGainEnabled,
+        preAmp: replayGainPreAmp,
+        type: replayGainType,
+      }),
+    [
+      replayGainDefaultGain,
+      replayGainEnabled,
+      replayGainPreAmp,
+      replayGainType,
+    ],
+  )
+  const replayGainPropertiesRef = useRef(replayGainProperties)
 
   const currentUrl = useMemo(() => getRawSongUrl(song), [song])
   const nextUrl = useMemo(
-    () => getRawSongUrl(resolveNextSong(currentList, currentSongIndex, loopState)),
+    () =>
+      getRawSongUrl(resolveNextSong(currentList, currentSongIndex, loopState)),
     [currentList, currentSongIndex, loopState],
   )
+
+  useEffect(() => {
+    replayGainPropertiesRef.current = replayGainProperties
+  }, [replayGainProperties])
 
   useEffect(() => {
     isPlayingRef.current = isPlaying
@@ -85,7 +114,7 @@ export function MpvAudioPlayer({
 
   useEffect(() => {
     window.api.mpvPlayer
-      .initialize({ binaryPath })
+      .initialize({ binaryPath, properties: replayGainPropertiesRef.current })
       .then((initialized) => {
         if (!initialized) onFallback(true)
       })
@@ -181,6 +210,10 @@ export function MpvAudioPlayer({
   useEffect(() => {
     window.api.mpvPlayer.volume(volume)
   }, [volume])
+
+  useEffect(() => {
+    window.api.mpvPlayer.setProperties(replayGainProperties)
+  }, [replayGainProperties])
 
   useEffect(() => {
     window.api.mpvPlayer.setProperties({

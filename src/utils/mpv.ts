@@ -14,6 +14,13 @@ export type MpvLoadLogDetails = {
   url: string
 }
 
+export type MpvReplayGainSettings = {
+  defaultGain: number
+  enabled: boolean
+  preAmp: number
+  type: 'album' | 'track'
+}
+
 const fallbackFailureKinds = new Set<MpvFailureKind>([
   'initialize',
   'process-crash',
@@ -41,6 +48,16 @@ export const normalizeMpvBinaryPath = (
 
 export const shouldFallbackForMpvFailure = (kind: MpvFailureKind): boolean =>
   fallbackFailureKinds.has(kind)
+
+export const resolveMpvInstanceForCommand = async <T>(
+  instance: null | T | undefined,
+  pendingStartup: null | Promise<T> | undefined,
+): Promise<null | T> => {
+  if (instance) return instance
+  if (pendingStartup) return pendingStartup
+
+  return null
+}
 
 export const sanitizeMpvUrlForLog = (rawUrl: string): string => {
   try {
@@ -77,5 +94,25 @@ export const describeMpvLoadForLog = (
   return {
     proxyAuthorization: hasProxyAuthorization ? 'attached' : 'absent',
     url: sanitizeMpvUrlForLog(url),
+  }
+}
+
+export const createMpvReplayGainProperties = ({
+  defaultGain,
+  enabled,
+  preAmp,
+  type,
+}: MpvReplayGainSettings): Record<string, number | string> => {
+  if (!enabled) {
+    return {
+      replaygain: 'no',
+    }
+  }
+
+  return {
+    replaygain: type,
+    'replaygain-clip': 'yes',
+    'replaygain-fallback': defaultGain,
+    'replaygain-preamp': preAmp,
   }
 }

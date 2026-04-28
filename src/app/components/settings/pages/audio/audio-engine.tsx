@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Content,
@@ -29,13 +30,48 @@ const audioEngines: AudioEngine[] = ['mpv', 'web']
 export function AudioEngineConfig() {
   const { t } = useTranslation()
   const desktop = isDesktop()
+  const [isMpvOnPath, setIsMpvOnPath] = useState(desktop)
   const { engine, mpvBinaryPath, setEngine, setMpvBinaryPath } =
     useAudioEngineSettings()
   const selectedEngine = desktop ? engine : 'web'
   const showMpvPath = shouldShowMpvBinaryPath({
     isDesktop: desktop,
+    isMpvOnPath,
     selectedEngine,
   })
+
+  useEffect(() => {
+    let isMounted = true
+
+    if (!desktop) {
+      setIsMpvOnPath(false)
+      return
+    }
+
+    window.api.mpvPlayer
+      .isOnPath()
+      .then((found) => {
+        if (isMounted) setIsMpvOnPath(found)
+      })
+      .catch(() => {
+        if (isMounted) setIsMpvOnPath(false)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [desktop])
+
+  useEffect(() => {
+    if (
+      desktop &&
+      isMpvOnPath &&
+      selectedEngine === 'mpv' &&
+      mpvBinaryPath
+    ) {
+      setMpvBinaryPath('')
+    }
+  }, [desktop, isMpvOnPath, mpvBinaryPath, selectedEngine, setMpvBinaryPath])
 
   return (
     <Root>

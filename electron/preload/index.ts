@@ -85,6 +85,7 @@ const api: IAonsokuAPI = {
     restart: (payload) =>
       ipcRenderer.invoke(IpcChannels.MpvPlayerRestart, payload),
     isRunning: () => ipcRenderer.invoke(IpcChannels.MpvPlayerIsRunning),
+    isOnPath: () => ipcRenderer.invoke(IpcChannels.MpvPlayerIsOnPath),
     cleanup: () => ipcRenderer.send(IpcChannels.MpvPlayerCleanup),
     setProperties: (payload) =>
       ipcRenderer.send(IpcChannels.MpvPlayerSetProperties, payload),

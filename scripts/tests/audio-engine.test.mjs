@@ -37,6 +37,7 @@ test('shouldShowMpvBinaryPath only shows the MPV path for desktop MPV playback',
   assert.equal(
     audioEngine.shouldShowMpvBinaryPath({
       isDesktop: true,
+      isMpvOnPath: false,
       selectedEngine: 'mpv',
     }),
     true,
@@ -45,6 +46,16 @@ test('shouldShowMpvBinaryPath only shows the MPV path for desktop MPV playback',
   assert.equal(
     audioEngine.shouldShowMpvBinaryPath({
       isDesktop: true,
+      isMpvOnPath: true,
+      selectedEngine: 'mpv',
+    }),
+    false,
+  )
+
+  assert.equal(
+    audioEngine.shouldShowMpvBinaryPath({
+      isDesktop: true,
+      isMpvOnPath: false,
       selectedEngine: 'web',
     }),
     false,
@@ -53,6 +64,7 @@ test('shouldShowMpvBinaryPath only shows the MPV path for desktop MPV playback',
   assert.equal(
     audioEngine.shouldShowMpvBinaryPath({
       isDesktop: false,
+      isMpvOnPath: false,
       selectedEngine: 'mpv',
     }),
     false,

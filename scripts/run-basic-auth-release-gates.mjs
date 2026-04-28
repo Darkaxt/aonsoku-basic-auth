@@ -13,6 +13,7 @@ const commands = [
   ],
   ['corepack', ['pnpm', 'run', 'build']],
   ['corepack', ['pnpm', 'run', 'electron:build']],
+  ['corepack', ['pnpm', 'run', 'check:electron-runtime-deps']],
   ['corepack', ['pnpm', 'run', 'lint']],
   ['node', ['scripts/check-basic-auth-secrets.mjs']],
 ]
@@ -20,6 +21,8 @@ const commands = [
 if (full) {
   commands.push(['node', ['scripts/basic-auth-smoke.mjs']])
   commands.push(['corepack', ['pnpm', 'run', 'build:win']])
+  commands.push(['corepack', ['pnpm', 'run', 'normalize:release-artifacts']])
+  commands.push(['corepack', ['pnpm', 'run', 'check:release-artifacts']])
 }
 
 for (const [command, args] of commands) {

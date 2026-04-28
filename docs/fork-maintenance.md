@@ -24,8 +24,9 @@ engine patch on top of `victoralvesf/aonsoku:main`.
 - MPV must receive proxy BasicAuth only from Electron main using the
   safeStorage-backed secret. Do not pass proxy credentials through renderer
   state, URL userinfo, command-line args, or logs.
-- MPV is not bundled in v1. Users install `mpv` or configure an MPV binary path
-  in Audio settings.
+- The `node-mpv` controller dependency must be bundled into Electron main.
+  The MPV player binary itself is not bundled in v1; users install `mpv` or
+  configure an MPV binary path in Audio settings.
 
 ## Current patch map
 
@@ -62,10 +63,14 @@ candidates. It runs:
 
 - BasicAuth and audio-engine helper tests.
 - Web and Electron builds.
+- Electron main runtime dependency check.
 - Biome lint.
 - Secret-redaction scan.
 - Traefik/Navidrome BasicAuth smoke harness.
 - Windows package build.
+- Release artifact metadata normalization/check. `latest.yml` must point to the
+  x64 installer at top level and include whitespace-free x64, arm64, and
+  combined installer entries; blockmaps must be present as sibling assets.
 
 Manual desktop release smoke must include MPV installed/configured, a protected
 Navidrome server, and direct playback of a high-resolution FLAC without server

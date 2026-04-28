@@ -1,7 +1,7 @@
 {
   "name": "aonsoku-basic-auth",
   "private": true,
-  "version": "0.14.0-ba.3",
+  "version": "0.14.0-ba.4",
   "description": "Unofficial Aonsoku fork with reverse-proxy BasicAuth support.",
   "author": {
     "name": "Victor Alves"
@@ -21,6 +21,9 @@
     "cy:open": "cypress open",
     "test": "cypress run --component",
     "test:proxy-auth": "node --test scripts/tests/proxy-auth.test.mjs scripts/tests/audio-engine.test.mjs",
+    "check:electron-runtime-deps": "node scripts/check-electron-runtime-deps.mjs",
+    "normalize:release-artifacts": "node scripts/normalize-release-artifacts.mjs",
+    "check:release-artifacts": "node scripts/check-release-artifacts.mjs",
     "electron:start": "electron-vite preview",
     "electron:dev": "electron-vite dev --watch",
     "electron:build": "electron-vite build",

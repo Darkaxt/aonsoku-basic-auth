@@ -10,9 +10,10 @@ client unusable for lossless libraries.
 - victoralvesf/aonsoku#389 - ALAC `.m4a` playback via server-side `opus`
   transcoding and metadata duration fallback, carried from upstream
   `development` for `0.14.0-ba.2`.
-- High-resolution/lossless song playback stability - this fork now defaults
-  desktop song playback to MPV in `0.14.0-ba.3`, while keeping Web audio for
-  web builds, radio, podcasts, and fallback.
+- High-resolution/lossless song playback stability - this fork defaults
+  desktop song playback to MPV, while keeping Web audio for web builds, radio,
+  podcasts, and fallback. `0.14.0-ba.4` fixes the packaged Electron runtime
+  dependency for the MPV controller.
 
 ## Reviewed but not claimed fixed
 

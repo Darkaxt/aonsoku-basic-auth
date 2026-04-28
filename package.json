@@ -91,7 +91,7 @@
     "idb-keyval": "^6.2.2",
     "immer": "^10.1.1",
     "linkify-it": "^5.0.0",
-    "lodash": "^4.17.23",
+    "lodash": "^4.18.1",
     "lucide-react": "^0.563.0",
     "node-mpv": "github:jeffvli/Node-MPV#32b4d64395289ad710c41d481d2707a7acfc228f",
     "react": "^18.3.1",
@@ -137,15 +137,15 @@
     "autoprefixer": "^10.4.21",
     "cypress": "^15.9.0",
     "cypress-real-events": "^1.15.0",
-    "electron": "^40.1.0",
+    "electron": "^40.8.5",
     "electron-builder": "^26.4.0",
     "electron-vite": "^5.0.0",
     "husky": "^9.1.7",
-    "postcss": "^8.5.3",
+    "postcss": "^8.5.10",
     "tailwindcss": "^3.4.19",
     "terser": "^5.39.0",
     "typescript": "^5.8.2",
-    "vite": "^7.3.1"
+    "vite": "^7.3.2"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -156,7 +156,7 @@
     "overrides": {
       "brace-expansion": "^2.0.2",
       "glob": "^11.0.0",
-      "tar": "^7.5.7"
+      "tar": "^7.5.13"
     }
   },
   "electron": {

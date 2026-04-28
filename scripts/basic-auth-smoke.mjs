@@ -27,6 +27,9 @@ const run = (command, args, options = {}) => {
 }
 
 const shaPassword = (password) => {
+  // This htpasswd SHA fixture is limited to the local Traefik smoke harness.
+
+  // codeql[js/insufficient-password-hash]
   return `{SHA}${createHash('sha1').update(password).digest('base64')}`
 }
 

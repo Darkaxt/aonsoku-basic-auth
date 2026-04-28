@@ -38,6 +38,10 @@ export function genPassword() {
 }
 
 export function genPasswordToken(password: string) {
+  // Subsonic token authentication requires MD5(password + salt); this is
+  // protocol-required token generation, not stored password hashing.
+
+  // codeql[js/insufficient-password-hash]
   return MD5(`${password}${saltWord}`).toString()
 }
 

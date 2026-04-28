@@ -79,3 +79,17 @@ transcoding.
 The smoke harness starts Navidrome behind Traefik BasicAuth and verifies that an
 unauthenticated request gets `401` while an authenticated request reaches the
 server.
+
+## Security alert handling
+
+- Keep `corepack pnpm audit --prod` clean before publishing desktop releases.
+- The Cypress transitive `uuid` alert (`GHSA-w5hq-g745-h8pq`) is dev/test-only
+  and non-runtime for this fork. `@cypress/request` currently only requires
+  `uuid.v4`, while the advisory affects `v3`, `v5`, and `v6` buffer writes.
+  Do not force `uuid@14` into Cypress unless Cypress validates cleanly with that
+  override.
+- `src/utils/salt.ts` uses MD5 only for Subsonic token authentication, where
+  the protocol requires `MD5(password + salt)`. It is not stored password
+  hashing.
+- `scripts/basic-auth-smoke.mjs` uses a SHA htpasswd fixture only for the local
+  Traefik/Navidrome smoke harness.

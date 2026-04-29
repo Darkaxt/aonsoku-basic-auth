@@ -1,7 +1,7 @@
 {
   "name": "aonsoku-basic-auth",
   "private": true,
-  "version": "0.14.0-ba.6",
+  "version": "0.14.0-ba.7",
   "description": "Unofficial Aonsoku fork with reverse-proxy BasicAuth support.",
   "author": {
     "name": "Victor Alves"
@@ -154,8 +154,10 @@
       "esbuild"
     ],
     "overrides": {
-      "brace-expansion": "^2.0.3",
       "glob": "^11.0.0",
+      "minimatch@3.1.5>brace-expansion": "2.0.3",
+      "minimatch@5.1.9>brace-expansion": "2.0.3",
+      "minimatch@9.0.9>brace-expansion": "2.0.3",
       "tar": "^7.5.13"
     }
   },

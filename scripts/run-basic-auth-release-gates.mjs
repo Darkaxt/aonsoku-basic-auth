@@ -10,6 +10,7 @@ const commands = [
       'scripts/tests/proxy-auth.test.mjs',
       'scripts/tests/audio-engine.test.mjs',
       'scripts/tests/mpv-hotfix.test.mjs',
+      'scripts/tests/lyrics.test.mjs',
     ],
   ],
   ['corepack', ['pnpm', 'run', 'build']],

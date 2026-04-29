@@ -20,7 +20,7 @@
     "check:proxy-auth-secrets": "node scripts/check-basic-auth-secrets.mjs",
     "cy:open": "cypress open",
     "test": "cypress run --component",
-    "test:proxy-auth": "node --test scripts/tests/proxy-auth.test.mjs scripts/tests/audio-engine.test.mjs scripts/tests/mpv-hotfix.test.mjs",
+    "test:proxy-auth": "node --test scripts/tests/proxy-auth.test.mjs scripts/tests/audio-engine.test.mjs scripts/tests/mpv-hotfix.test.mjs scripts/tests/lyrics.test.mjs",
     "check:electron-runtime-deps": "node scripts/check-electron-runtime-deps.mjs",
     "normalize:release-artifacts": "node scripts/normalize-release-artifacts.mjs",
     "check:release-artifacts": "node scripts/check-release-artifacts.mjs",

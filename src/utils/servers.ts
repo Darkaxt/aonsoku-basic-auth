@@ -16,13 +16,16 @@ export function checkServerType() {
 
 export function getServerExtensions() {
   const { extensionsSupported } = useAppStore.getState().data
+  const songLyricsVersions = extensionsSupported?.songLyrics ?? []
 
   const songLyricsEnabled =
-    extensionsSupported &&
-    extensionsSupported.songLyrics &&
-    extensionsSupported.songLyrics.length > 0
+    extensionsSupported && songLyricsVersions.length > 0
+  const songLyricsEnhancedEnabled = songLyricsVersions.some(
+    (version) => version >= 2,
+  )
 
   return {
+    songLyricsEnhancedEnabled,
     songLyricsEnabled,
   }
 }

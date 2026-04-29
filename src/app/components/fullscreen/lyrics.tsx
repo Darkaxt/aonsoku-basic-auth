@@ -11,6 +11,7 @@ import {
 import { subsonic } from '@/service/subsonic'
 import { usePlayerRef, usePlayerSonglist } from '@/store/player.store'
 import { ILyric } from '@/types/responses/song'
+import { isSyncedLyricsValue, LYRIC_LINE_BREAK } from '@/utils/lyrics'
 
 interface LyricProps {
   lyrics: ILyric
@@ -87,7 +88,10 @@ function SyncedLyrics({ lyrics }: LyricProps) {
               active ? 'opacity-100 scale-125' : 'opacity-50',
             )}
           >
-            {line.content}
+            <LyricLineText
+              text={line.content}
+              translationClassName="block text-base 2xl:text-xl opacity-80 mt-1 leading-snug"
+            />
           </p>
         )}
       />
@@ -131,7 +135,10 @@ function UnsyncedLyrics({ lyrics }: LyricProps) {
             index === lines.length - 1 && 'mb-16',
           )}
         >
-          {line}
+          <LyricLineText
+            text={line}
+            translationClassName="block text-base 2xl:text-lg opacity-80 leading-snug"
+          />
         </p>
       ))}
     </ScrollArea>
@@ -151,11 +158,28 @@ function CenteredMessage({ children }: CenteredMessageProps) {
 }
 
 function areLyricsSynced(lyrics: ILyric) {
-  // Most LRC files start with the string "[00:" or "[01:" indicating synced lyrics
-  const lyric = lyrics.value?.trim() ?? ''
+  return isSyncedLyricsValue(lyrics.value ?? '')
+}
+
+function LyricLineText({
+  text,
+  translationClassName,
+}: {
+  text: string
+  translationClassName: string
+}) {
+  const lines = text.split(LYRIC_LINE_BREAK)
+
   return (
-    lyric.startsWith('[00:') ||
-    lyric.startsWith('[01:') ||
-    lyric.startsWith('[02:')
+    <>
+      {lines.map((line, index) => (
+        <span
+          key={`${index}-${line}`}
+          className={clsx(index > 0 && translationClassName)}
+        >
+          {line}
+        </span>
+      ))}
+    </>
   )
 }

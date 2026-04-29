@@ -23,8 +23,9 @@ export interface ILyricsList {
 }
 
 export interface IStructuredLyric {
-  displayArtist: string
-  displayTitle: string
+  displayArtist?: string
+  displayTitle?: string
+  kind?: string
   lang?: string
   offset?: number
   synced: boolean
@@ -32,6 +33,7 @@ export interface IStructuredLyric {
 }
 
 export interface IStructuredLine {
+  end?: number
   start?: number
   value: string
 }

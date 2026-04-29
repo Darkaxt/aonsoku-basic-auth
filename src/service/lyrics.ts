@@ -3,12 +3,18 @@ import { httpClient } from '@/api/httpClient'
 import { usePlayerStore } from '@/store/player.store'
 import {
   ILyric,
-  IStructuredLine,
   IStructuredLyric,
   LyricsResponse,
   StructuredLyricsResponse,
 } from '@/types/responses/song'
 import { lrclibClient } from '@/utils/appName'
+import {
+  formatSyncedLyricsForLrc,
+  mergeDuplicateSyncedLyricLines,
+  mergeSyncedLyricTranslations,
+  normalizeLyricsForDisplay,
+  type SynchronizedLyricsArray,
+} from '@/utils/lyrics'
 import { checkServerType, getServerExtensions } from '@/utils/servers'
 
 interface GetLyricsData {
@@ -29,12 +35,13 @@ interface LRCLibResponse {
 
 async function getLyrics(getLyricsData: GetLyricsData) {
   const { preferSyncedLyrics } = usePlayerStore.getState().settings.lyrics
-  const { songLyricsEnabled } = getServerExtensions()
+  const { songLyricsEnabled, songLyricsEnhancedEnabled } = getServerExtensions()
 
   const cacheKey = getLyricsCacheKey(
     getLyricsData,
     preferSyncedLyrics,
     songLyricsEnabled,
+    songLyricsEnhancedEnabled,
   )
 
   const cachedLyrics = await get(cacheKey)
@@ -56,6 +63,7 @@ async function getLyrics(getLyricsData: GetLyricsData) {
       {
         method: 'GET',
         query: {
+          ...(songLyricsEnhancedEnabled ? { enhanced: 'true' } : {}),
           id: getLyricsData.id,
         },
       },
@@ -65,10 +73,16 @@ async function getLyrics(getLyricsData: GetLyricsData) {
       const { structuredLyrics } = response.data.lyricsList
 
       if (structuredLyrics && structuredLyrics.length > 0) {
-        const syncedLyrics = structuredLyrics.find((lyrics) => lyrics.synced)
+        const syncedLyrics =
+          structuredLyrics.find(
+            (lyrics) => lyrics.synced && lyrics.kind !== 'translation',
+          ) ?? structuredLyrics.find((lyrics) => lyrics.synced)
 
         if (syncedLyrics) {
-          const serverSyncedLyrics = osStructuredLyricsToILyric(syncedLyrics)
+          const serverSyncedLyrics = osStructuredLyricsToILyric(
+            syncedLyrics,
+            structuredLyrics,
+          )
 
           set(cacheKey, serverSyncedLyrics)
 
@@ -77,7 +91,17 @@ async function getLyrics(getLyricsData: GetLyricsData) {
       }
 
       // save the plain lyrics retrieved from the server
-      osUnsyncedLyricsFound = osStructuredLyricsToILyric(structuredLyrics[0])
+      const plainLyrics =
+        structuredLyrics.find(
+          (lyrics) => !lyrics.synced && lyrics.kind !== 'translation',
+        ) ?? structuredLyrics.find((lyrics) => !lyrics.synced)
+
+      if (plainLyrics) {
+        osUnsyncedLyricsFound = osStructuredLyricsToILyric(
+          plainLyrics,
+          structuredLyrics,
+        )
+      }
     }
   }
 
@@ -125,7 +149,16 @@ async function getLyrics(getLyricsData: GetLyricsData) {
   }
 
   if (response?.data.lyrics) {
-    set(cacheKey, response.data.lyrics)
+    const serverLyrics = {
+      ...response.data.lyrics,
+      value: response.data.lyrics.value
+        ? normalizeLyricsForDisplay(response.data.lyrics.value)
+        : response.data.lyrics.value,
+    }
+
+    set(cacheKey, serverLyrics)
+
+    return serverLyrics
   }
 
   return response?.data.lyrics
@@ -191,7 +224,7 @@ async function getLyricsFromLRCLib(getLyricsData: GetLyricsData) {
       return {
         artist,
         title,
-        value: formatLyrics(finalLyric),
+        value: normalizeLyricsForDisplay(finalLyric),
       }
     }
   } catch {}
@@ -203,45 +236,64 @@ async function getLyricsFromLRCLib(getLyricsData: GetLyricsData) {
   }
 }
 
-function formatLyrics(lyrics: string) {
-  return lyrics.trim().replaceAll('\r\n', '\n')
-}
-
 function getLyricsCacheKey(
   getLyricsData: GetLyricsData,
   preferSyncedLyrics: boolean,
   songLyricsEnabled?: boolean,
+  songLyricsEnhancedEnabled?: boolean,
 ) {
   const { artist, title } = getLyricsData
 
   const type = preferSyncedLyrics ? 'synced' : 'plain'
-  const serverExtension = songLyricsEnabled ? 'internal' : 'external'
+  const serverExtension = songLyricsEnabled
+    ? songLyricsEnhancedEnabled
+      ? 'internal-enhanced'
+      : 'internal'
+    : 'external'
 
   const keys = ['lyrics', artist, title, type, serverExtension]
 
   return keys.join(':')
 }
 
-function osStructuredLyricsToILyric(lyrics: IStructuredLyric): ILyric {
+function osStructuredLyricsToILyric(
+  lyrics: IStructuredLyric,
+  allLyrics: IStructuredLyric[] = [],
+): ILyric {
+  const value = lyrics.synced
+    ? formatSyncedLyricsForLrc(
+        lyrics.kind === 'translation'
+          ? osStructuredLyricsToSyncedLyrics(lyrics)
+          : mergeSyncedLyricTranslations(
+              osStructuredLyricsToSyncedLyrics(lyrics),
+              allLyrics
+                .filter(
+                  (translation) =>
+                    translation !== lyrics &&
+                    translation.kind === 'translation' &&
+                    translation.synced,
+                )
+                .map(osStructuredLyricsToSyncedLyrics)
+                .filter((translation) => translation.length > 0),
+            ),
+      )
+    : normalizeLyricsForDisplay(lyrics.line.map((line) => line.value).join('\n'))
+
   return {
     artist: lyrics.displayArtist,
     title: lyrics.displayTitle,
-    value: formatLyrics(lyrics.line.map(osLineToILyricLine).join('\n')),
+    value,
   }
 }
 
-function osLineToILyricLine(line: IStructuredLine): string {
-  if (line.start !== undefined) {
-    return `[${osStartMsToSongTimestamp(line.start)}] ${line.value}`
-  }
-  return line.value
-}
-
-function osStartMsToSongTimestamp(startTime: number): string {
-  // Date() isoString is formatted as:
-  // YYYY-MM-DDTHH:mm:ss.sssZ -> mm:ss.ss
-  // 2011-10-05T14:48:00.000Z -> 48:00.00
-  return new Date(startTime).toISOString().slice(14, -2)
+function osStructuredLyricsToSyncedLyrics(
+  lyrics: IStructuredLyric,
+): SynchronizedLyricsArray {
+  return mergeDuplicateSyncedLyricLines(
+    lyrics.line.flatMap<[number, string]>((line) =>
+      line.start === undefined ? [] : [[line.start, line.value]],
+    ),
+  )
 }
 
 export const lyrics = {
